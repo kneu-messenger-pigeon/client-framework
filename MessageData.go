@@ -1,4 +1,4 @@
-package main
+package framework
 
 import (
 	scoreApi "github.com/kneu-messenger-pigeon/score-api"

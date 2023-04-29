@@ -1,4 +1,4 @@
-package main
+package framework
 
 import (
 	"github.com/kneu-messenger-pigeon/authorizer-client"
