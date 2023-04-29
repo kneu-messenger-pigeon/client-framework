@@ -2,11 +2,16 @@ package framework
 
 import (
 	"bytes"
+	"embed"
+	_ "embed"
 	scoreApi "github.com/kneu-messenger-pigeon/score-api"
 	"strconv"
 	"text/template"
 	"time"
 )
+
+//go:embed templates/*.md
+var templates embed.FS
 
 type MessageComposerInterface interface {
 	ComposeWelcomeAnonymousMessage(authUrl string) (error, string)
@@ -30,7 +35,7 @@ func NewMessageComposer(config MessageComposerConfig) *MessageComposer {
 	composer.templates = template.Must(
 		template.New("").
 			Funcs(composer.getFunctionMap()).
-			ParseGlob("templates/*.md"),
+			ParseFS(templates, "templates/*.md"),
 	)
 
 	/*
