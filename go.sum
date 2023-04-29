@@ -23,6 +23,8 @@ github.com/kneu-messenger-pigeon/authorizer-client v0.1.2 h1:m+7L22kW3DBtgqjE28J
 github.com/kneu-messenger-pigeon/authorizer-client v0.1.2/go.mod h1:tNdwuaRhX09ewMFOkESyxOASBY7gAzNWgfVDoro3VnQ=
 github.com/kneu-messenger-pigeon/events v0.1.28 h1:kM1sEmu9GSaBSY0Cy3FyK8g+C8w2EqUxyblwpID9Xio=
 github.com/kneu-messenger-pigeon/events v0.1.28/go.mod h1:yPgqpO/+XVOZmTdH8BB4wbE+2/keLNhjorMVzJwHQL8=
+github.com/kneu-messenger-pigeon/events v0.1.29 h1:uJtPueYTU5JwiSpC4iGrkzOKCAqsYDs6w14TDrlnHbs=
+github.com/kneu-messenger-pigeon/events v0.1.29/go.mod h1:yPgqpO/+XVOZmTdH8BB4wbE+2/keLNhjorMVzJwHQL8=
 github.com/kneu-messenger-pigeon/score-api v0.1.6 h1:vmR9nvrbqeWDiJPx/kup3hG1wg8+iIgH6vgRtw7Rqvo=
 github.com/kneu-messenger-pigeon/score-api v0.1.6/go.mod h1:xP8MpI8JaEeR7GUEWnq3p0meJ41Tz5+N+aRKNC4nRbM=
 github.com/kneu-messenger-pigeon/score-client v0.1.2 h1:CurCQsC2ZUDn7sL/u6oYwf8EmWpYI30mKJsNRqgwQ34=

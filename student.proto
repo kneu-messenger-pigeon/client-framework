@@ -2,11 +2,10 @@ syntax="proto3";
 
 package framework;
 
-option go_package="./;main";
+option go_package="./;framework";
 
 message Student {
   string name = 1;
-  int32 age = 2;
   uint32 Id = 3;
   string LastName = 4;
   string FirstName = 5;

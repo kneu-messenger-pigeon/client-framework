@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kneu-messenger-pigeon/authorizer-client v0.1.2
-	github.com/kneu-messenger-pigeon/events v0.1.28
+	github.com/kneu-messenger-pigeon/events v0.1.29
 	github.com/kneu-messenger-pigeon/score-api v0.1.6
 	github.com/kneu-messenger-pigeon/score-client v0.1.2
 	github.com/redis/go-redis/v9 v9.0.3

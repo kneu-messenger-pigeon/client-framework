@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func TestKafkaToRedisConnector(t *testing.T) {
+func TestKafkaConsumerProcessor_Execute(t *testing.T) {
 	matchContext := mock.MatchedBy(func(ctx context.Context) bool { return true })
 
 	t.Run("Two iteration and Commit", func(t *testing.T) {
@@ -135,4 +135,34 @@ func TestKafkaToRedisConnector(t *testing.T) {
 
 		assert.Empty(t, out.String())
 	})
+}
+
+func TestKafkaConsumerProcessor_Disable(t *testing.T) {
+	out := &bytes.Buffer{}
+
+	handler := NewMockEventHandlerInterface(t)
+	handler.On("GetExpectedMessageKey").Return("")
+	handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{})
+
+	reader := events.NewMockReaderInterface(t)
+
+	connector := KafkaConsumerProcessor{
+		out:     out,
+		reader:  reader,
+		handler: handler,
+	}
+
+	connector.Disable()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
+	start := time.Now()
+	ctx, fetchCancel := context.WithTimeout(context.Background(), time.Second)
+	connector.Execute(ctx, &wg)
+	fetchCancel()
+
+	executionTime := time.Now().Sub(start)
+
+	assert.Less(t, executionTime, time.Millisecond*100)
 }

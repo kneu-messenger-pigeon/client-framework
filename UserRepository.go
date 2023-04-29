@@ -31,8 +31,8 @@ func (repository *UserRepository) SaveUser(clientUserId string, student *Student
 	studentSerialized, err := proto.Marshal(student)
 	ctx := context.Background()
 	if err == nil {
-		pipe := repository.redis.Pipeline()
-		if previousStudent.Id != student.Id {
+		pipe := repository.redis.TxPipeline()
+		if previousStudent.Id != student.Id && previousStudent.Id != 0 {
 			pipe.Del(ctx, clientUserId)
 			pipe.SRem(ctx, student.GetIdString(), clientUserId)
 		}
@@ -67,20 +67,24 @@ func (repository *UserRepository) GetStudent(clientUserId string) *Student {
 		_ = proto.Unmarshal(studentSerialized, student)
 	}
 
-	if student.Id == 0 {
+	if student.Id != 0 {
 		repository.redis.Expire(ctx, student.GetIdString(), UserExpiration)
 	}
 
 	return student
 }
 
-func (repository *UserRepository) GetClientUserIds(studentId uint) (ids []string) {
+func (repository *UserRepository) GetClientUserIds(studentId uint) []string {
 	if studentId != 0 {
-		ids = repository.redis.SMembers(
+		result := repository.redis.SMembers(
 			context.Background(),
 			strconv.FormatUint(uint64(studentId), 10),
-		).Val()
+		)
+
+		if result.Err() == nil {
+			return result.Val()
+		}
 	}
 
-	return ids
+	return []string{}
 }
