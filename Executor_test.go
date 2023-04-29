@@ -46,7 +46,7 @@ func TestEventLoopExecute(t *testing.T) {
 			time.Sleep(time.Nanosecond * 200)
 			_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 		}()
-		executor.execute()
+		executor.Execute()
 
 		processor.AssertExpectations(t)
 		clientController.AssertExpectations(t)

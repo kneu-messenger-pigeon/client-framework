@@ -14,7 +14,7 @@ type MockExecutorInterface struct {
 	mock.Mock
 }
 
-// execute provides a mock function with given fields: ctx, wg
+// Execute provides a mock function with given fields: ctx, wg
 func (_m *MockExecutorInterface) Execute(ctx context.Context, wg *sync.WaitGroup) {
 	_m.Called(ctx, wg)
 }

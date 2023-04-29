@@ -14,7 +14,7 @@ type Executor struct {
 	serviceContainer *ServiceContainer
 }
 
-func (executor *Executor) execute() {
+func (executor *Executor) Execute() {
 	_, err := executor.serviceContainer.UserRepository.redis.Ping(context.Background()).Result()
 	if err != nil {
 		_, _ = fmt.Fprintf(executor.out, "Failed to connect to redisClient: %s\n", err.Error())
