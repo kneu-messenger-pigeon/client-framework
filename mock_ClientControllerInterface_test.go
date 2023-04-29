@@ -21,6 +21,20 @@ func (_m *MockClientControllerInterface) Execute(ctx context.Context, wg *sync.W
 	_m.Called(ctx, wg)
 }
 
+// LogoutFinishedAction provides a mock function with given fields: event
+func (_m *MockClientControllerInterface) LogoutFinishedAction(event *events.UserAuthorizedEvent) error {
+	ret := _m.Called(event)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*events.UserAuthorizedEvent) error); ok {
+		r0 = rf(event)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // ScoreChangedAction provides a mock function with given fields: event
 func (_m *MockClientControllerInterface) ScoreChangedAction(event *events.ScoreChangedEvent) error {
 	ret := _m.Called(event)
@@ -35,8 +49,8 @@ func (_m *MockClientControllerInterface) ScoreChangedAction(event *events.ScoreC
 	return r0
 }
 
-// UserAuthorizedAction provides a mock function with given fields: event
-func (_m *MockClientControllerInterface) UserAuthorizedAction(event *events.UserAuthorizedEvent) error {
+// WelcomeAuthorizedAction provides a mock function with given fields: event
+func (_m *MockClientControllerInterface) WelcomeAuthorizedAction(event *events.UserAuthorizedEvent) error {
 	ret := _m.Called(event)
 
 	var r0 error

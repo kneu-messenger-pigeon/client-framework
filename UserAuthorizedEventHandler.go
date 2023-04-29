@@ -45,7 +45,13 @@ func (handler *UserAuthorizedEventHandler) Handle(s any) (err error) {
 }
 
 func (handler *UserAuthorizedEventHandler) callControllerAction(event *events.UserAuthorizedEvent) {
-	err := handler.serviceContainer.ClientController.UserAuthorizedAction(event)
+	var err error
+	if event.StudentId != 0 {
+		err = handler.serviceContainer.ClientController.WelcomeAuthorizedAction(event)
+	} else {
+		err = handler.serviceContainer.ClientController.LogoutFinishedAction(event)
+	}
+
 	if err != nil {
 		_, _ = fmt.Fprintf(handler.out, "UserAuthorizedAction return error: %v", err)
 	}
