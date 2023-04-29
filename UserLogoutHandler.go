@@ -9,7 +9,7 @@ import (
 )
 
 type UserLogoutHandlerInterface interface {
-	handle(clientUserId string) error
+	Handle(clientUserId string) error
 }
 
 type UserLogoutHandler struct {
@@ -18,7 +18,7 @@ type UserLogoutHandler struct {
 	writer events.WriterInterface
 }
 
-func (handler UserLogoutHandler) handle(clientUserId string) error {
+func (handler UserLogoutHandler) Handle(clientUserId string) error {
 	event := events.UserAuthorizedEvent{
 		Client:       handler.Client,
 		ClientUserId: clientUserId,
