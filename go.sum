@@ -21,6 +21,8 @@ github.com/klauspost/compress v1.15.9 h1:wKRjX6JRtDdrE9qwa4b/Cip7ACOshUI4smpCQan
 github.com/klauspost/compress v1.15.9/go.mod h1:PhcZ0MbTNciWF3rruxRgKxI5NkcHHrHUDtV4Yw2GlzU=
 github.com/kneu-messenger-pigeon/authorizer-client v0.1.2 h1:m+7L22kW3DBtgqjE28JBM7dFfUxXW2wy76TW0jul4Gs=
 github.com/kneu-messenger-pigeon/authorizer-client v0.1.2/go.mod h1:tNdwuaRhX09ewMFOkESyxOASBY7gAzNWgfVDoro3VnQ=
+github.com/kneu-messenger-pigeon/client-framework-mocks v0.1.0 h1:SIeafCGowlBU31pfpFDoEtHjbCB/t3YtkmbMVEtmxbM=
+github.com/kneu-messenger-pigeon/client-framework-mocks v0.1.0/go.mod h1:aQ+qZev04sIc/GjaroUXXy6mD+tpbvbOAODG05sQpQA=
 github.com/kneu-messenger-pigeon/events v0.1.28 h1:kM1sEmu9GSaBSY0Cy3FyK8g+C8w2EqUxyblwpID9Xio=
 github.com/kneu-messenger-pigeon/events v0.1.28/go.mod h1:yPgqpO/+XVOZmTdH8BB4wbE+2/keLNhjorMVzJwHQL8=
 github.com/kneu-messenger-pigeon/events v0.1.29 h1:uJtPueYTU5JwiSpC4iGrkzOKCAqsYDs6w14TDrlnHbs=

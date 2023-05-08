@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	frameworkMocks "github.com/kneu-messenger-pigeon/client-framework-mocks"
 	"github.com/kneu-messenger-pigeon/events"
 	"github.com/segmentio/kafka-go"
 	"github.com/stretchr/testify/assert"
@@ -34,7 +35,7 @@ func TestKafkaConsumerProcessor_Execute(t *testing.T) {
 
 		ctx, cancel := context.WithCancel(context.Background())
 
-		handler := NewMockEventHandlerInterface(t)
+		handler := frameworkMocks.NewMockEventHandlerInterface(t)
 		handler.On("GetExpectedMessageKey").Return(events.UserAuthorizedEventName)
 		handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{})
 		handler.On("Handle", &event).Once().Return(nil)
@@ -80,7 +81,7 @@ func TestKafkaConsumerProcessor_Execute(t *testing.T) {
 
 		ctx, cancel := context.WithCancel(context.Background())
 
-		handler := NewMockEventHandlerInterface(t)
+		handler := frameworkMocks.NewMockEventHandlerInterface(t)
 		handler.On("Handle", &event).Once().Return(nil)
 		handler.On("GetExpectedMessageKey").Return(events.UserAuthorizedEventName)
 		handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{})
@@ -110,7 +111,7 @@ func TestKafkaConsumerProcessor_Execute(t *testing.T) {
 	t.Run("Emulate writer init error", func(t *testing.T) {
 		out := &bytes.Buffer{}
 
-		handler := NewMockEventHandlerInterface(t)
+		handler := frameworkMocks.NewMockEventHandlerInterface(t)
 		handler.On("GetExpectedMessageKey").Return("")
 		handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{})
 
@@ -140,7 +141,7 @@ func TestKafkaConsumerProcessor_Execute(t *testing.T) {
 func TestKafkaConsumerProcessor_Disable(t *testing.T) {
 	out := &bytes.Buffer{}
 
-	handler := NewMockEventHandlerInterface(t)
+	handler := frameworkMocks.NewMockEventHandlerInterface(t)
 	handler.On("GetExpectedMessageKey").Return("")
 	handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{})
 
