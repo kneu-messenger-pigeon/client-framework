@@ -2,7 +2,7 @@ syntax="proto3";
 
 package framework;
 
-option go_package="./;framework";
+option go_package="./;models";
 
 message Student {
   string name = 1;

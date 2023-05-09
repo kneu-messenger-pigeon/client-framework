@@ -2,6 +2,7 @@ package framework
 
 import (
 	"fmt"
+	"github.com/kneu-messenger-pigeon/client-framework/models"
 	"github.com/kneu-messenger-pigeon/events"
 	"io"
 )
@@ -28,12 +29,12 @@ func (handler *UserAuthorizedEventHandler) Commit() error {
 func (handler *UserAuthorizedEventHandler) Handle(s any) (err error) {
 	event := s.(*events.UserAuthorizedEvent)
 	if event.Client == handler.clientName {
-		err = handler.repository.SaveUser(event.ClientUserId, &Student{
+		err = handler.repository.SaveUser(event.ClientUserId, &models.Student{
 			Id:         uint32(event.StudentId),
 			LastName:   event.LastName,
 			FirstName:  event.FirstName,
 			MiddleName: event.MiddleName,
-			Gender:     Student_GenderType(event.Gender),
+			Gender:     models.Student_GenderType(event.Gender),
 		})
 
 		if err == nil && handler.serviceContainer != nil && handler.serviceContainer.ClientController != nil {

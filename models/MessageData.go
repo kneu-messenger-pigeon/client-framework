@@ -1,4 +1,4 @@
-package framework
+package models
 
 import (
 	scoreApi "github.com/kneu-messenger-pigeon/score-api"
@@ -21,4 +21,11 @@ type DisciplinesListMessageData struct {
 type DisciplinesScoresMessageData struct {
 	StudentMessageData
 	Discipline scoreApi.DisciplineScoreResult
+}
+
+func NewStudentMessageData(student *Student) StudentMessageData {
+	return StudentMessageData{
+		NamePrefix: student.GetNamePrefix(),
+		Name:       student.FirstName,
+	}
 }

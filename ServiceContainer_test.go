@@ -2,7 +2,7 @@ package framework
 
 import (
 	"bytes"
-	frameworkMocks "github.com/kneu-messenger-pigeon/client-framework-mocks"
+	"github.com/kneu-messenger-pigeon/client-framework/mocks"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -85,7 +85,7 @@ func TestNewServiceContainer(t *testing.T) {
 
 func TestServiceContainer_SetController(t *testing.T) {
 	serviceContainer := &ServiceContainer{}
-	controller := frameworkMocks.NewMockClientControllerInterface(t)
+	controller := mocks.NewClientControllerInterface(t)
 	serviceContainer.SetController(controller)
 	assert.Equal(t, controller, serviceContainer.ClientController)
 }

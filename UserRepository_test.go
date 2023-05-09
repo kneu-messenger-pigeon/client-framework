@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/go-redis/redismock/v9"
+	"github.com/kneu-messenger-pigeon/client-framework/models"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/proto"
 	"testing"
@@ -15,13 +16,13 @@ func TestUserRepository_SaveUser(t *testing.T) {
 		redisMock.MatchExpectationsInOrder(true)
 
 		clientUserId := "test-id"
-		student := Student{
+		student := models.Student{
 			Name:       "Коваль Валера Павлович",
 			Id:         99,
 			LastName:   "Коваль",
 			FirstName:  "Валера",
 			MiddleName: "Павлович",
-			Gender:     Student_MALE,
+			Gender:     models.Student_MALE,
 		}
 
 		studentSerialized, _ := proto.Marshal(&student)
@@ -49,22 +50,22 @@ func TestUserRepository_SaveUser(t *testing.T) {
 		redisMock.MatchExpectationsInOrder(true)
 
 		clientUserId := "test-id"
-		previousStudent := Student{
+		previousStudent := models.Student{
 			Name:       "Ткаченко Марія Андріївна",
 			Id:         190,
 			LastName:   "Ткаченко",
 			FirstName:  "Марія",
 			MiddleName: "Андріївна",
-			Gender:     Student_FEMALE,
+			Gender:     models.Student_FEMALE,
 		}
 
-		student := Student{
+		student := models.Student{
 			Name:       "Коваль Валера Павлович",
 			Id:         99,
 			LastName:   "Коваль",
 			FirstName:  "Валера",
 			MiddleName: "Павлович",
-			Gender:     Student_MALE,
+			Gender:     models.Student_MALE,
 		}
 
 		previousStudentSerialized, _ := proto.Marshal(&previousStudent)
@@ -96,22 +97,22 @@ func TestUserRepository_SaveUser(t *testing.T) {
 		redisMock.MatchExpectationsInOrder(true)
 
 		clientUserId := "test-id"
-		previousStudent := Student{
+		previousStudent := models.Student{
 			Name:       "Ткаченко Марія Андріївна",
 			Id:         190,
 			LastName:   "Ткаченко",
 			FirstName:  "Марія",
 			MiddleName: "Андріївна",
-			Gender:     Student_FEMALE,
+			Gender:     models.Student_FEMALE,
 		}
 
-		student := Student{
+		student := models.Student{
 			Name:       "",
 			Id:         0,
 			LastName:   "",
 			FirstName:  "",
 			MiddleName: "",
-			Gender:     Student_UNKNOWN,
+			Gender:     models.Student_UNKNOWN,
 		}
 
 		previousStudentSerialized, _ := proto.Marshal(&previousStudent)
@@ -140,13 +141,13 @@ func TestUserRepository_SaveUser(t *testing.T) {
 		expectedErr := errors.New("expected-test-error")
 
 		clientUserId := "test-id"
-		student := Student{
+		student := models.Student{
 			Name:       "Коваль Валера Павлович",
 			Id:         99,
 			LastName:   "Коваль",
 			FirstName:  "Валера",
 			MiddleName: "Павлович",
-			Gender:     Student_MALE,
+			Gender:     models.Student_MALE,
 		}
 
 		studentSerialized, _ := proto.Marshal(&student)
@@ -175,13 +176,13 @@ func TestUserRepository_GetStudentUser(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		clientUserId := "test-id"
 
-		student := &Student{
+		student := &models.Student{
 			Name:       "Коваль Валера Павлович",
 			Id:         99,
 			LastName:   "Коваль",
 			FirstName:  "Валера",
 			MiddleName: "Павлович",
-			Gender:     Student_MALE,
+			Gender:     models.Student_MALE,
 		}
 
 		studentSerialized, _ := proto.Marshal(student)
@@ -214,11 +215,11 @@ func TestUserRepository_GetStudentUser(t *testing.T) {
 		redisMock.ExpectGetEx(clientUserId, UserExpiration).RedisNil()
 
 		actualStudent := userRepository.GetStudent(clientUserId)
-		assertStudent(t, &Student{}, actualStudent)
+		assertStudent(t, &models.Student{}, actualStudent)
 	})
 }
 
-func assertStudent(t *testing.T, expected *Student, actual *Student) {
+func assertStudent(t *testing.T, expected *models.Student, actual *models.Student) {
 	assert.Equal(t, expected.Id, actual.Id)
 	assert.Equal(t, expected.Name, actual.Name)
 	assert.Equal(t, expected.LastName, actual.LastName)

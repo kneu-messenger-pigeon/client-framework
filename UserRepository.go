@@ -2,19 +2,13 @@ package framework
 
 import (
 	"context"
+	"github.com/kneu-messenger-pigeon/client-framework/models"
 	"github.com/redis/go-redis/v9"
 	"google.golang.org/protobuf/proto"
 	"io"
 	"strconv"
 	"time"
 )
-
-type UserRepositoryInterface interface {
-	SaveUser(clientUserId string, student *Student) error
-	GetStudent(clientUserId string) *Student
-	GetClientUserIds(studentId uint) []string
-	Commit() error
-}
 
 type UserRepository struct {
 	out   io.Writer
@@ -25,7 +19,7 @@ const UserExpiration = time.Hour * 24 * 30 * 7 // 7 months, 210 days
 
 const RedisBackgroundSaveInProgress = "ERR Background save already in progress"
 
-func (repository *UserRepository) SaveUser(clientUserId string, student *Student) (err error) {
+func (repository *UserRepository) SaveUser(clientUserId string, student *models.Student) (err error) {
 	previousStudent := repository.GetStudent(clientUserId)
 
 	studentSerialized, err := proto.Marshal(student)
@@ -58,11 +52,11 @@ func (repository *UserRepository) Commit() error {
 	return err
 }
 
-func (repository *UserRepository) GetStudent(clientUserId string) *Student {
+func (repository *UserRepository) GetStudent(clientUserId string) *models.Student {
 	ctx := context.Background()
 	studentSerialized, _ := repository.redis.GetEx(ctx, clientUserId, UserExpiration).Bytes()
 
-	student := &Student{}
+	student := &models.Student{}
 	if len(studentSerialized) > 0 {
 		_ = proto.Unmarshal(studentSerialized, student)
 	}

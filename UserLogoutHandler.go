@@ -8,10 +8,6 @@ import (
 	"io"
 )
 
-type UserLogoutHandlerInterface interface {
-	Handle(clientUserId string) error
-}
-
 type UserLogoutHandler struct {
 	out    io.Writer
 	Client string

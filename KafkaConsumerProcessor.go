@@ -11,11 +11,6 @@ import (
 	"time"
 )
 
-type KafkaConsumerProcessorInterface interface {
-	ExecutableInterface
-	Disable()
-}
-
 type KafkaConsumerProcessor struct {
 	out             io.Writer
 	reader          events.ReaderInterface

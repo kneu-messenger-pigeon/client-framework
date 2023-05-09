@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.28.1
 // 	protoc        v3.21.12
-// source: student.proto
+// source: Student.proto
 
-package framework
+package models
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
