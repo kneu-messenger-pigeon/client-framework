@@ -40,7 +40,7 @@ func (processor *KafkaConsumerProcessor) Execute(ctx context.Context, wg *sync.W
 		return
 	}
 
-	_, _ = fmt.Fprintf(processor.out, "Consuming for %T started \n", processor.handler)
+	_, _ = fmt.Fprintf(processor.out, "Started consuming %T \n", processor.handler)
 
 	for ctx.Err() == nil {
 		message, err = processor.reader.FetchMessage(fetchContext)
