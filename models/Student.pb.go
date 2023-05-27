@@ -79,7 +79,7 @@ type Student struct {
 	LastName   string             `protobuf:"bytes,4,opt,name=LastName,proto3" json:"LastName,omitempty"`
 	FirstName  string             `protobuf:"bytes,5,opt,name=FirstName,proto3" json:"FirstName,omitempty"`
 	MiddleName string             `protobuf:"bytes,6,opt,name=MiddleName,proto3" json:"MiddleName,omitempty"`
-	Gender     Student_GenderType `protobuf:"varint,7,opt,name=Gender,proto3,enum=framework.Student_GenderType" json:"Gender,omitempty"`
+	Gender     Student_GenderType `protobuf:"varint,7,opt,name=Gender,proto3,enum=Student_GenderType" json:"Gender,omitempty"`
 }
 
 func (x *Student) Reset() {
@@ -195,11 +195,11 @@ func file_student_proto_rawDescGZIP() []byte {
 var file_student_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_student_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_student_proto_goTypes = []interface{}{
-	(Student_GenderType)(0), // 0: framework.Student.GenderType
-	(*Student)(nil),         // 1: framework.Student
+	(Student_GenderType)(0), // 0: Student.GenderType
+	(*Student)(nil),         // 1: Student
 }
 var file_student_proto_depIdxs = []int32{
-	0, // 0: framework.Student.Gender:type_name -> framework.Student.GenderType
+	0, // 0: Student.Gender:type_name -> Student.GenderType
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

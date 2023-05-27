@@ -1,6 +1,7 @@
 package framework
 
 import (
+	"fmt"
 	"github.com/kneu-messenger-pigeon/client-framework/models"
 	scoreApi "github.com/kneu-messenger-pigeon/score-api"
 	"github.com/stretchr/testify/assert"
@@ -124,8 +125,8 @@ func TestMessageComposer_ComposeDisciplineScoresMessage(t *testing.T) {
 							LongName:  "Лекція",
 						},
 					},
-					FirstScore:  3,
-					SecondScore: 0,
+					FirstScore:  floatPointer(3),
+					SecondScore: nil,
 					IsAbsent:    false,
 				},
 				{
@@ -138,8 +139,8 @@ func TestMessageComposer_ComposeDisciplineScoresMessage(t *testing.T) {
 							LongName:  "Семінар",
 						},
 					},
-					FirstScore:  0,
-					SecondScore: 0,
+					FirstScore:  nil,
+					SecondScore: nil,
 					IsAbsent:    true,
 				},
 				{
@@ -152,8 +153,8 @@ func TestMessageComposer_ComposeDisciplineScoresMessage(t *testing.T) {
 							LongName:  "Семінар",
 						},
 					},
-					FirstScore:  0,
-					SecondScore: 6,
+					FirstScore:  nil,
+					SecondScore: floatPointer(6),
 					IsAbsent:    true,
 				},
 				{
@@ -166,8 +167,8 @@ func TestMessageComposer_ComposeDisciplineScoresMessage(t *testing.T) {
 							LongName:  "Лабороторна робота",
 						},
 					},
-					FirstScore:  0,
-					SecondScore: 0,
+					FirstScore:  nil,
+					SecondScore: nil,
 					IsAbsent:    false,
 				},
 				{
@@ -180,8 +181,8 @@ func TestMessageComposer_ComposeDisciplineScoresMessage(t *testing.T) {
 							LongName:  "Реферат",
 						},
 					},
-					FirstScore:  2,
-					SecondScore: 1,
+					FirstScore:  floatPointer(2),
+					SecondScore: floatPointer(1),
 					IsAbsent:    false,
 				},
 			},
@@ -191,7 +192,7 @@ func TestMessageComposer_ComposeDisciplineScoresMessage(t *testing.T) {
 			StudentMessageData: composeTestStudentData,
 			Discipline:         discipline,
 		}
-
+		fmt.Println(messageData.Discipline.Scores)
 		composer := NewMessageComposer(MessageComposerConfig{})
 		err, message := composer.ComposeDisciplineScoresMessage(messageData)
 
@@ -218,12 +219,95 @@ func TestMessageComposer_ComposeDisciplineScoresMessage(t *testing.T) {
 }
 
 func TestMessageComposer_ComposeScoreChanged(t *testing.T) {
-	t.Run("simple", func(t *testing.T) {
+	discipline := scoreApi.Discipline{
+		Id:   110,
+		Name: "Наноекономіка",
+	}
+
+	t.Run("created_score", func(t *testing.T) {
 		composer := NewMessageComposer(MessageComposerConfig{})
-		err, message := composer.ComposeScoreChanged()
+
+		messageData := models.ScoreChangedMessageData{
+			Discipline: discipline,
+			Score: scoreApi.Score{
+				Lesson: scoreApi.Lesson{
+					Id:   456,
+					Date: time.Date(2023, 5, 12, 0, 0, 0, 0, time.Local),
+					Type: scoreApi.LessonType{
+						Id:        28,
+						ShortName: "Реф",
+						LongName:  "Реферат",
+					},
+				},
+				FirstScore:  floatPointer(5.5),
+				SecondScore: floatPointer(1),
+				IsAbsent:    false,
+			},
+			Previous: scoreApi.Score{},
+		}
+
+		fmt.Println(messageData)
+		err, message := composer.ComposeScoreChanged(messageData)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "todo changed", message)
+		assert.Equal(t, "Новий запис: Наноекономіка, заняття 12.05.2023 _Реферат_: 5.5 та 1", message)
+	})
+
+	t.Run("deleted_score", func(t *testing.T) {
+		composer := NewMessageComposer(MessageComposerConfig{})
+
+		messageData := models.ScoreChangedMessageData{
+			Discipline: discipline,
+			Score: scoreApi.Score{
+				Lesson: scoreApi.Lesson{
+					Id:   456,
+					Date: time.Date(2023, 5, 12, 0, 0, 0, 0, time.Local),
+					Type: scoreApi.LessonType{
+						Id:        28,
+						ShortName: "Реф",
+						LongName:  "Реферат",
+					},
+				},
+			},
+			Previous: scoreApi.Score{
+				FirstScore: floatPointer(1.5),
+				IsAbsent:   false,
+			},
+		}
+		err, message := composer.ComposeScoreChanged(messageData)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "Видалено запис: Наноекономіка, заняття 12.05.2023 _Реферат_: ~1.5~", message)
+	})
+
+	t.Run("changed_score", func(t *testing.T) {
+		composer := NewMessageComposer(MessageComposerConfig{})
+
+		messageData := models.ScoreChangedMessageData{
+			Discipline: discipline,
+			Score: scoreApi.Score{
+				Lesson: scoreApi.Lesson{
+					Id:   456,
+					Date: time.Date(2023, 5, 12, 0, 0, 0, 0, time.Local),
+					Type: scoreApi.LessonType{
+						Id:        28,
+						ShortName: "Реф",
+						LongName:  "Реферат",
+					},
+				},
+				FirstScore:  floatPointer(5.5),
+				SecondScore: floatPointer(1),
+				IsAbsent:    false,
+			},
+			Previous: scoreApi.Score{
+				FirstScore:  floatPointer(2.5),
+				SecondScore: floatPointer(2.0),
+			},
+		}
+		err, message := composer.ComposeScoreChanged(messageData)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "Змінено запис: Наноекономіка, заняття 12.05.2023 _Реферат_: 5.5 та 1 (було ~2.5 та 2~)", message)
 	})
 }
 
@@ -239,4 +323,8 @@ func TestMessageComposer_ComposeLogoutFinishedMessage(t *testing.T) {
 
 func _formatFloat(v float32) string {
 	return strconv.FormatFloat(float64(v), 'f', 0, 32)
+}
+
+func floatPointer(value float32) *float32 {
+	return &value
 }

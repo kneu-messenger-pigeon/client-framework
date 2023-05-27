@@ -82,6 +82,7 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 		handler: &ScoreChangedEventHandler{
 			out:              out,
 			serviceContainer: container,
+			repository:       container.UserRepository,
 		},
 		reader: kafka.NewReader(
 			kafka.ReaderConfig{

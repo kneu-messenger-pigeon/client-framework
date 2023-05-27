@@ -11,14 +11,15 @@ import (
 )
 
 type BaseConfig struct {
-	clientName          string
-	appSecret           string
-	kafkaHost           string
-	kafkaTimeout        time.Duration
-	kafkaAttempts       int
-	scoreStorageApiHost string
-	authorizerHost      string
-	redisOptions        *redis.Options
+	clientName                string
+	appSecret                 string
+	kafkaHost                 string
+	kafkaTimeout              time.Duration
+	kafkaAttempts             int
+	scoreStorageApiHost       string
+	authorizerHost            string
+	redisOptions              *redis.Options
+	scoreChangedStorageExpire time.Duration
 }
 
 func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {

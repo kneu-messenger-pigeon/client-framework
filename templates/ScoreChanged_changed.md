@@ -1,0 +1,1 @@
+Змінено запис: {{.Discipline.Name}}, заняття {{date .Lesson.Date}} _{{.Lesson.Type.LongName}}_: {{renderScore .Score}} (було ~{{renderScore .Previous}}~)

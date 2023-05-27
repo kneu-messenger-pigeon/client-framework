@@ -71,6 +71,7 @@ func TestNewServiceContainer(t *testing.T) {
 
 		assert.IsType(t, &ScoreChangedEventHandler{}, scoreChangedEventProcessor.handler)
 		scoreChangedEventHandler := scoreChangedEventProcessor.handler.(*ScoreChangedEventHandler)
+		assert.Equal(t, serviceContainer.UserRepository, scoreChangedEventHandler.repository)
 		assert.Equal(t, out, scoreChangedEventHandler.out)
 		assert.Equal(t, serviceContainer, scoreChangedEventHandler.serviceContainer)
 

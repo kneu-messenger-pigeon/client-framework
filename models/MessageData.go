@@ -23,6 +23,12 @@ type DisciplinesScoresMessageData struct {
 	Discipline scoreApi.DisciplineScoreResult
 }
 
+type ScoreChangedMessageData struct {
+	scoreApi.Discipline
+	scoreApi.Score
+	Previous scoreApi.Score
+}
+
 func NewStudentMessageData(student *Student) StudentMessageData {
 	return StudentMessageData{
 		NamePrefix: student.GetNamePrefix(),

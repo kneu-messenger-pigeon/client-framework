@@ -59,8 +59,14 @@ func (composer *MessageComposer) ComposeDisciplineScoresMessage(messageData mode
 	return composer.compose("DisciplineScores.md", messageData)
 }
 
-func (composer *MessageComposer) ComposeScoreChanged() (error, string) {
-	return composer.compose("ScoreChanged.md", nil)
+func (composer *MessageComposer) ComposeScoreChanged(messageData models.ScoreChangedMessageData) (error, string) {
+	if messageData.Previous.IsDeleted() {
+		return composer.compose("ScoreChanged_created.md", messageData)
+	} else if messageData.IsDeleted() {
+		return composer.compose("ScoreChanged_deleted.md", messageData)
+	} else {
+		return composer.compose("ScoreChanged_changed.md", messageData)
+	}
 }
 
 func (composer *MessageComposer) ComposeLogoutFinishedMessage() (error, string) {
@@ -88,13 +94,13 @@ func (composer *MessageComposer) getFunctionMap() template.FuncMap {
 }
 
 func (composer *MessageComposer) renderScore(score scoreApi.Score) string {
-	if score.FirstScore != 0 && score.SecondScore != 0 {
+	if score.FirstScore != nil && score.SecondScore != nil {
 		return composer.formatScore(score.FirstScore) + " та " + composer.formatScore(score.SecondScore)
 
-	} else if score.FirstScore != 0 {
+	} else if score.FirstScore != nil {
 		return composer.formatScore(score.FirstScore)
 
-	} else if score.SecondScore != 0 {
+	} else if score.SecondScore != nil {
 		return composer.formatScore(score.SecondScore)
 
 	} else if score.IsAbsent {
@@ -105,6 +111,6 @@ func (composer *MessageComposer) renderScore(score scoreApi.Score) string {
 	}
 }
 
-func (composer *MessageComposer) formatScore(score float32) string {
-	return strconv.FormatFloat(float64(score), 'f', -1, 32)
+func (composer *MessageComposer) formatScore(score *float32) string {
+	return strconv.FormatFloat(float64(*score), 'f', -1, 32)
 }

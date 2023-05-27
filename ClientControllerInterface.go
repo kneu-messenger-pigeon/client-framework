@@ -1,10 +1,13 @@
 package framework
 
-import "github.com/kneu-messenger-pigeon/events"
+import (
+	"github.com/kneu-messenger-pigeon/events"
+	scoreApi "github.com/kneu-messenger-pigeon/score-api"
+)
 
 type ClientControllerInterface interface {
 	ExecutableInterface
-	ScoreChangedAction(event *events.ScoreChangedEvent) error
+	ScoreChangedAction(chatId string, previousMessageId string, event *scoreApi.DisciplineScore, previousScore *scoreApi.Score) (err error, messageId string)
 	WelcomeAuthorizedAction(event *events.UserAuthorizedEvent) error
 	LogoutFinishedAction(event *events.UserAuthorizedEvent) error
 }
