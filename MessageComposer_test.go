@@ -1,7 +1,6 @@
 package framework
 
 import (
-	"fmt"
 	"github.com/kneu-messenger-pigeon/client-framework/models"
 	scoreApi "github.com/kneu-messenger-pigeon/score-api"
 	"github.com/stretchr/testify/assert"
@@ -193,7 +192,7 @@ func TestMessageComposer_ComposeDisciplineScoresMessage(t *testing.T) {
 			StudentMessageData: composeTestStudentData,
 			Discipline:         discipline,
 		}
-		fmt.Println(messageData.Discipline.Scores)
+
 		composer := NewMessageComposer(MessageComposerConfig{})
 		err, message := composer.ComposeDisciplineScoresMessage(messageData)
 
@@ -247,7 +246,6 @@ func TestMessageComposer_ComposeScoreChanged(t *testing.T) {
 			Previous: scoreApi.Score{},
 		}
 
-		fmt.Println(messageData)
 		err, message := composer.ComposeScoreChanged(messageData)
 
 		assert.NoError(t, err)
