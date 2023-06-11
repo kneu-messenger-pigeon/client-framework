@@ -7,6 +7,6 @@ type MessageComposerInterface interface {
 	ComposeWelcomeAuthorizedMessage(messageData models.UserAuthorizedMessageData) (error, string)
 	ComposeDisciplinesListMessage(messageData models.DisciplinesListMessageData) (error, string)
 	ComposeDisciplineScoresMessage(messageData models.DisciplinesScoresMessageData) (error, string)
-	ComposeScoreChanged() (error, string)
+	ComposeScoreChanged(messageData models.ScoreChangedMessageData) (error, string)
 	ComposeLogoutFinishedMessage() (error, string)
 }

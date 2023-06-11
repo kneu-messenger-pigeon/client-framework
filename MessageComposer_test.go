@@ -18,7 +18,8 @@ var composeTestStudentData = models.StudentMessageData{
 
 func TestMessageComposer_ComposeWelcomeAnonymousMessage(t *testing.T) {
 	t.Run("simple", func(t *testing.T) {
-		composer := NewMessageComposer(MessageComposerConfig{})
+		var composer MessageComposerInterface
+		composer = NewMessageComposer(MessageComposerConfig{})
 
 		authUrl := "https://example.com/auth"
 
