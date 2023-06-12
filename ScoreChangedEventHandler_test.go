@@ -217,6 +217,104 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
+	t.Run("success_created_scores_remove_previous_message", func(t *testing.T) {
+		event := events.ScoreChangedEvent{
+			ScoreEvent: events.ScoreEvent{
+				Id:           112233,
+				StudentId:    123,
+				LessonId:     150,
+				LessonPart:   1,
+				DisciplineId: 234,
+				Year:         2028,
+				Semester:     1,
+				ScoreValue: events.ScoreValue{
+					Value:     2.5,
+					IsAbsent:  false,
+					IsDeleted: false,
+				},
+				UpdatedAt: time.Date(2028, time.Month(11), 18, 14, 30, 40, 0, time.Local),
+				SyncedAt:  time.Date(2028, time.Month(11), 18, 14, 35, 13, 0, time.Local),
+			},
+			Previous: events.ScoreValue{
+				Value:     0,
+				IsAbsent:  false,
+				IsDeleted: true,
+			},
+		}
+		disciplineScore := scoreApi.DisciplineScore{
+			Discipline: scoreApi.Discipline{
+				Id:   int(event.DisciplineId),
+				Name: "Капітал!",
+			},
+			Score: scoreApi.Score{
+				Lesson: scoreApi.Lesson{
+					Id:   int(event.LessonId),
+					Date: time.Date(2023, time.Month(2), 12, 0, 0, 0, 0, time.Local),
+					Type: scoreApi.LessonType{
+						Id:        5,
+						ShortName: "МК",
+						LongName:  "Модульний контроль.",
+					},
+				},
+				FirstScore: floatPointer(2.5),
+			},
+		}
+
+		chatIds := []string{
+			"test-chat-id-1",
+			"test-chat-id-2",
+		}
+
+		previousMessageIds := []string{
+			"chat-message-id-1",
+			"chat-message-id-2",
+		}
+
+		previousScore := scoreApi.Score{}
+
+		clientController := mocks.NewClientControllerInterface(t)
+
+		userRepository := mocks.NewUserRepositoryInterface(t)
+		userRepository.On("GetClientUserIds", event.StudentId).Return(chatIds)
+
+		scoreClient := score.NewMockClientInterface(t)
+		scoreClient.On("GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId)).Return(disciplineScore, nil)
+
+		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
+		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
+
+		messageIdStorage := mocks.NewScoreChangedMessageIdStorageInterface(t)
+		messageIdStorage.On("GetAll", event.StudentId, event.LessonId).
+			Return(models.ScoreChangedMessageMap{
+				chatIds[0]: previousMessageIds[0],
+				chatIds[1]: previousMessageIds[1],
+			})
+
+		messageIdStorage.On("Set", event.StudentId, event.LessonId, chatIds[0], "").Return()
+		messageIdStorage.On("Set", event.StudentId, event.LessonId, chatIds[1], "").Return()
+
+		handler := ScoreChangedEventHandler{
+			out:                          &bytes.Buffer{},
+			repository:                   userRepository,
+			scoreClient:                  scoreClient,
+			scoreChangedEventComposer:    scoreChangeEventComposer,
+			scoreChangedMessageIdStorage: messageIdStorage,
+			serviceContainer: &ServiceContainer{
+				ClientController: clientController,
+			},
+		}
+
+		clientController.On("ScoreChangedAction", chatIds[0], previousMessageIds[0], &disciplineScore, &previousScore).
+			Return(nil, "")
+		clientController.On("ScoreChangedAction", chatIds[1], previousMessageIds[1], &disciplineScore, &previousScore).
+			Return(nil, "")
+
+		err := handler.Handle(&event)
+		// wait for async coroutine call
+		time.Sleep(time.Millisecond * 40)
+		assert.NoError(t, err)
+	})
+
 	t.Run("success_created_scores_controller_action_err", func(t *testing.T) {
 		expectedError := errors.New("test expected error")
 

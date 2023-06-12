@@ -35,6 +35,28 @@ func TestScoreChangedMessageIdStorage_Set(t *testing.T) {
 		assert.NoError(t, redisMock.ExpectationsWereMet())
 	})
 
+	t.Run("set_empty", func(t *testing.T) {
+		redisClient, redisMock := redismock.NewClientMock()
+		redisMock.MatchExpectationsInOrder(true)
+
+		storage := ScoreChangedMessageIdStorage{
+			out:           &bytes.Buffer{},
+			redis:         redisClient,
+			storageExpire: time.Minute,
+		}
+
+		chatId := "test-chat-id-1"
+		messageId := ""
+		expectedKey := "SM:123:99"
+
+		redisMock.ExpectHDel(expectedKey, chatId).SetVal(1)
+		redisMock.ExpectExpire(expectedKey, time.Minute).SetVal(true)
+
+		storage.Set(123, 99, chatId, messageId)
+
+		assert.NoError(t, redisMock.ExpectationsWereMet())
+	})
+
 	t.Run("error", func(t *testing.T) {
 		expectedError := errors.New("expected error")
 

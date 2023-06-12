@@ -38,6 +38,8 @@ github.com/kneu-messenger-pigeon/score-api v0.1.9 h1:EhFsVNOTt9ReMok8XC4yW76Errg
 github.com/kneu-messenger-pigeon/score-api v0.1.9/go.mod h1:xP8MpI8JaEeR7GUEWnq3p0meJ41Tz5+N+aRKNC4nRbM=
 github.com/kneu-messenger-pigeon/score-api v0.1.10 h1:kisCl38Tr/0abbM0Y24cP+lU5did5xkuI4wkGfq132k=
 github.com/kneu-messenger-pigeon/score-api v0.1.10/go.mod h1:xP8MpI8JaEeR7GUEWnq3p0meJ41Tz5+N+aRKNC4nRbM=
+github.com/kneu-messenger-pigeon/score-api v0.1.11 h1:YZ3fKhJqHVCPXoqAT7BuWpxCveDqCgUmIhGoNBPBRGI=
+github.com/kneu-messenger-pigeon/score-api v0.1.11/go.mod h1:xP8MpI8JaEeR7GUEWnq3p0meJ41Tz5+N+aRKNC4nRbM=
 github.com/kneu-messenger-pigeon/score-client v0.1.2 h1:CurCQsC2ZUDn7sL/u6oYwf8EmWpYI30mKJsNRqgwQ34=
 github.com/kneu-messenger-pigeon/score-client v0.1.2/go.mod h1:1TZ1fS2mNfqf+VWYNYjqxA8g/EQnwuFcw8G7QzD9THo=
 github.com/kneu-messenger-pigeon/score-client v0.1.5 h1:D6Qse7akw05x6T4pFavMDApLA5zWqBtG33DH24KFKrU=
@@ -52,6 +54,8 @@ github.com/kneu-messenger-pigeon/score-client v0.1.9 h1:0MU0poT+SnlqK59n+PNI1OHs
 github.com/kneu-messenger-pigeon/score-client v0.1.9/go.mod h1:aZ+pi+GHK+7MzcyEoxTLyqFJTcrf3+8Qtm6ki8KkCes=
 github.com/kneu-messenger-pigeon/score-client v0.1.10 h1:tYByJxUHkFK15cird/KAm4/mASow/n0SrTljkOSinOA=
 github.com/kneu-messenger-pigeon/score-client v0.1.10/go.mod h1:aZ+pi+GHK+7MzcyEoxTLyqFJTcrf3+8Qtm6ki8KkCes=
+github.com/kneu-messenger-pigeon/score-client v0.1.11 h1:aD+rWOrljQNeTxguzyQJCbXp3qi4KsmbXZZNQDIqaaA=
+github.com/kneu-messenger-pigeon/score-client v0.1.11/go.mod h1:SjyPoLfsnMMVSFrVRD1fwgE8ZZEm0pDBdv8P+j+J2Tg=
 github.com/pierrec/lz4/v4 v4.1.15 h1:MO0/ucJhngq7299dKLwIMtgTfbkoSPF6AoMYDd8Q4q0=
 github.com/pierrec/lz4/v4 v4.1.15/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

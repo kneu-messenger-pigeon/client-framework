@@ -18,7 +18,13 @@ type ScoreChangedMessageIdStorage struct {
 
 func (storage *ScoreChangedMessageIdStorage) Set(studentId uint, lessonId uint, chatId string, messageId string) {
 	key := storage.makeKey(studentId, lessonId)
-	err := storage.redis.HSet(context.Background(), key, chatId, messageId).Err()
+	var err error
+	if messageId == "" {
+		err = storage.redis.HDel(context.Background(), key, chatId).Err()
+
+	} else {
+		err = storage.redis.HSet(context.Background(), key, chatId, messageId).Err()
+	}
 
 	if err == nil {
 		err = storage.redis.Expire(context.Background(), key, storage.storageExpire).Err()

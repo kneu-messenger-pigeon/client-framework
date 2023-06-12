@@ -7,8 +7,8 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kneu-messenger-pigeon/authorizer-client v0.1.2
 	github.com/kneu-messenger-pigeon/events v0.1.33
-	github.com/kneu-messenger-pigeon/score-api v0.1.10
-	github.com/kneu-messenger-pigeon/score-client v0.1.10
+	github.com/kneu-messenger-pigeon/score-api v0.1.11
+	github.com/kneu-messenger-pigeon/score-client v0.1.11
 	github.com/redis/go-redis/v9 v9.0.3
 	github.com/segmentio/kafka-go v0.4.39
 	github.com/stretchr/testify v1.8.2

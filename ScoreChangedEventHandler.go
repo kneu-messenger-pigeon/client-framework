@@ -83,7 +83,7 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 		_, _ = fmt.Fprintf(handler.out, "ScoreChangedAction return error: %v", err)
 	}
 
-	if messageId != "" {
+	if messageId != "" || previousMessageId != "" {
 		handler.scoreChangedMessageIdStorage.Set(studentId, uint(score.Score.Lesson.Id), chatId, messageId)
 	}
 }
