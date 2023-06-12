@@ -156,6 +156,11 @@ func (_m *MessageComposerInterface) ComposeWelcomeAuthorizedMessage(messageData 
 	return r0, r1
 }
 
+// SetPostFilter provides a mock function with given fields: filter
+func (_m *MessageComposerInterface) SetPostFilter(filter func(string) string) {
+	_m.Called(filter)
+}
+
 type mockConstructorTestingTNewMessageComposerInterface interface {
 	mock.TestingT
 	Cleanup(func())

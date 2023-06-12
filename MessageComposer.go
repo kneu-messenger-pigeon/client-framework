@@ -16,7 +16,7 @@ var templates embed.FS
 
 type MessageComposer struct {
 	templates  *template.Template
-	PostFilter func(string) string
+	postFilter func(string) string
 }
 
 type MessageComposerConfig struct {
@@ -31,7 +31,7 @@ func NewMessageComposer(config MessageComposerConfig) *MessageComposer {
 			ParseFS(templates, "templates/*.md"),
 	)
 
-	composer.PostFilter = func(i string) string {
+	composer.postFilter = func(i string) string {
 		return i
 	}
 
@@ -46,6 +46,10 @@ func NewMessageComposer(config MessageComposerConfig) *MessageComposer {
 	*/
 
 	return composer
+}
+
+func (composer *MessageComposer) SetPostFilter(filter func(string) string) {
+	composer.postFilter = filter
 }
 
 func (composer *MessageComposer) ComposeWelcomeAnonymousMessage(authUrl string) (error, string) {
@@ -81,7 +85,7 @@ func (composer *MessageComposer) ComposeLogoutFinishedMessage() (error, string) 
 func (composer *MessageComposer) compose(name string, data any) (error, string) {
 	output := bytes.Buffer{}
 	err := composer.templates.ExecuteTemplate(&output, name, data)
-	return err, composer.PostFilter(output.String())
+	return err, composer.postFilter(output.String())
 }
 
 func (composer *MessageComposer) getFunctionMap() template.FuncMap {

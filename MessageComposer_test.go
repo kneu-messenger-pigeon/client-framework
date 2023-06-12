@@ -324,9 +324,9 @@ func TestNewMessageComposer_PostFilter(t *testing.T) {
 	replacedString := "REPLACED"
 
 	composer := NewMessageComposer(MessageComposerConfig{})
-	composer.PostFilter = func(i string) string {
+	composer.SetPostFilter(func(i string) string {
 		return replacedString
-	}
+	})
 
 	err, actualMessage := composer.ComposeLogoutFinishedMessage()
 
