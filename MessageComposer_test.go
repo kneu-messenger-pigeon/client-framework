@@ -320,6 +320,20 @@ func TestMessageComposer_ComposeLogoutFinishedMessage(t *testing.T) {
 	})
 }
 
+func TestNewMessageComposer_PostFilter(t *testing.T) {
+	replacedString := "REPLACED"
+
+	composer := NewMessageComposer(MessageComposerConfig{})
+	composer.PostFilter = func(i string) string {
+		return replacedString
+	}
+
+	err, actualMessage := composer.ComposeLogoutFinishedMessage()
+
+	assert.NoError(t, err)
+	assert.Equal(t, replacedString, actualMessage)
+}
+
 func _formatFloat(v float32) string {
 	return strconv.FormatFloat(float64(v), 'f', 0, 32)
 }

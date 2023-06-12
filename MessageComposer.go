@@ -15,7 +15,8 @@ import (
 var templates embed.FS
 
 type MessageComposer struct {
-	templates *template.Template
+	templates  *template.Template
+	PostFilter func(string) string
 }
 
 type MessageComposerConfig struct {
@@ -29,6 +30,10 @@ func NewMessageComposer(config MessageComposerConfig) *MessageComposer {
 			Funcs(composer.getFunctionMap()).
 			ParseFS(templates, "templates/*.md"),
 	)
+
+	composer.PostFilter = func(i string) string {
+		return i
+	}
 
 	/*
 		for _, tpl := range composer.templates.Templates() {
@@ -76,7 +81,7 @@ func (composer *MessageComposer) ComposeLogoutFinishedMessage() (error, string) 
 func (composer *MessageComposer) compose(name string, data any) (error, string) {
 	output := bytes.Buffer{}
 	err := composer.templates.ExecuteTemplate(&output, name, data)
-	return err, output.String()
+	return err, composer.PostFilter(output.String())
 }
 
 func (composer *MessageComposer) getFunctionMap() template.FuncMap {
