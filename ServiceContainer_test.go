@@ -6,19 +6,21 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 func TestNewServiceContainer(t *testing.T) {
 	t.Run("succeess", func(t *testing.T) {
 		out := &bytes.Buffer{}
 		config := BaseConfig{
-			clientName:          "test-client",
-			appSecret:           "test-secret",
-			kafkaHost:           "localhost",
-			kafkaTimeout:        0,
-			kafkaAttempts:       0,
-			scoreStorageApiHost: "localhost:8080",
-			authorizerHost:      "localhost:8081",
+			clientName:                  "test-client",
+			appSecret:                   "test-secret",
+			kafkaHost:                   "localhost",
+			kafkaTimeout:                0,
+			kafkaAttempts:               0,
+			scoreStorageApiHost:         "localhost:8080",
+			authorizerHost:              "localhost:8081",
+			repeatScoreChangesTimeframe: time.Second * 1533,
 			redisOptions: &redis.Options{
 				Network:    "tcp",
 				Addr:       "localhost:6379",
@@ -74,6 +76,18 @@ func TestNewServiceContainer(t *testing.T) {
 		assert.Equal(t, serviceContainer.UserRepository, scoreChangedEventHandler.repository)
 		assert.Equal(t, out, scoreChangedEventHandler.out)
 		assert.Equal(t, serviceContainer, scoreChangedEventHandler.serviceContainer)
+
+		assert.IsType(t, &ScoreChangeEventComposer{}, scoreChangedEventHandler.scoreChangedEventComposer)
+		scoreChangedEventComposer := scoreChangedEventHandler.scoreChangedEventComposer.(*ScoreChangeEventComposer)
+		assert.Equal(t, config.repeatScoreChangesTimeframe, scoreChangedEventComposer.storageExpire)
+		assert.NotEmpty(t, scoreChangedEventComposer.redis)
+		assert.Equal(t, out, scoreChangedEventComposer.out)
+
+		assert.IsType(t, &ScoreChangedMessageIdStorage{}, scoreChangedEventHandler.scoreChangedMessageIdStorage)
+		scoreChangedMessageIdStorage := scoreChangedEventHandler.scoreChangedMessageIdStorage.(*ScoreChangedMessageIdStorage)
+		assert.Equal(t, config.repeatScoreChangesTimeframe, scoreChangedMessageIdStorage.storageExpire)
+		assert.NotEmpty(t, scoreChangedMessageIdStorage.redis)
+		assert.Equal(t, out, scoreChangedMessageIdStorage.out)
 
 		assert.NotNil(t, serviceContainer.Executor)
 		assert.IsType(t, &Executor{}, serviceContainer.Executor)

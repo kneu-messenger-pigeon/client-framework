@@ -11,15 +11,15 @@ import (
 )
 
 type BaseConfig struct {
-	clientName                string
-	appSecret                 string
-	kafkaHost                 string
-	kafkaTimeout              time.Duration
-	kafkaAttempts             int
-	scoreStorageApiHost       string
-	authorizerHost            string
-	redisOptions              *redis.Options
-	scoreChangedStorageExpire time.Duration
+	clientName                  string
+	appSecret                   string
+	kafkaHost                   string
+	kafkaTimeout                time.Duration
+	kafkaAttempts               int
+	scoreStorageApiHost         string
+	authorizerHost              string
+	redisOptions                *redis.Options
+	repeatScoreChangesTimeframe time.Duration
 }
 
 func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
@@ -40,14 +40,20 @@ func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
 		kafkaAttempts = 0
 	}
 
+	repeatScoreChangesTimeframeSeconds, err := strconv.Atoi(os.Getenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES"))
+	if repeatScoreChangesTimeframeSeconds == 0 || err != nil {
+		repeatScoreChangesTimeframeSeconds = 600
+	}
+
 	config := BaseConfig{
-		clientName:          clientName,
-		appSecret:           os.Getenv("APP_SECRET"),
-		kafkaHost:           os.Getenv("KAFKA_HOST"),
-		kafkaTimeout:        time.Second * time.Duration(kafkaTimeout),
-		kafkaAttempts:       kafkaAttempts,
-		scoreStorageApiHost: os.Getenv("SCORE_STORAGE_API_HOST"),
-		authorizerHost:      os.Getenv("AUTHORIZER_HOST"),
+		clientName:                  clientName,
+		appSecret:                   os.Getenv("APP_SECRET"),
+		kafkaHost:                   os.Getenv("KAFKA_HOST"),
+		kafkaTimeout:                time.Second * time.Duration(kafkaTimeout),
+		kafkaAttempts:               kafkaAttempts,
+		scoreStorageApiHost:         os.Getenv("SCORE_STORAGE_API_HOST"),
+		authorizerHost:              os.Getenv("AUTHORIZER_HOST"),
+		repeatScoreChangesTimeframe: time.Second * time.Duration(repeatScoreChangesTimeframeSeconds),
 	}
 
 	if config.appSecret == "" {

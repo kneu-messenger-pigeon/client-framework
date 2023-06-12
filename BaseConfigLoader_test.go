@@ -13,13 +13,14 @@ import (
 var testClientName = "test-client"
 
 var expectedBaseConfig = BaseConfig{
-	clientName:          testClientName,
-	appSecret:           "test_Secret_test123",
-	kafkaHost:           "KAFKA:9999",
-	kafkaTimeout:        time.Second * 10,
-	kafkaAttempts:       0,
-	scoreStorageApiHost: "http://localhost:8080",
-	authorizerHost:      "http://localhost:8082",
+	clientName:                  testClientName,
+	appSecret:                   "test_Secret_test123",
+	kafkaHost:                   "KAFKA:9999",
+	kafkaTimeout:                time.Second * 10,
+	kafkaAttempts:               0,
+	scoreStorageApiHost:         "http://localhost:8080",
+	authorizerHost:              "http://localhost:8082",
+	repeatScoreChangesTimeframe: time.Minute * 5,
 	redisOptions: &redis.Options{
 		Network: "tcp",
 		Addr:    "REDIS:6379",
@@ -36,6 +37,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("REDIS_DSN", BuildRedisDsn(expectedBaseConfig.redisOptions))
 		_ = os.Setenv("SCORE_STORAGE_API_HOST", expectedBaseConfig.scoreStorageApiHost)
 		_ = os.Setenv("AUTHORIZER_HOST", expectedBaseConfig.authorizerHost)
+		_ = os.Setenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES", strconv.Itoa(int(expectedBaseConfig.repeatScoreChangesTimeframe.Seconds())))
 
 		baseConfig, err := LoadBaseConfig("", testClientName)
 
@@ -55,12 +57,14 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Unsetenv("REDIS_DSN")
 		_ = os.Unsetenv("SCORE_STORAGE_API_HOST")
 		_ = os.Unsetenv("AUTHORIZER_HOST")
+		_ = os.Unsetenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES")
 
 		envFileContent += fmt.Sprintf("APP_SECRET=%s\n", expectedBaseConfig.appSecret)
 		envFileContent += fmt.Sprintf("KAFKA_HOST=%s\n", expectedBaseConfig.kafkaHost)
 		envFileContent += fmt.Sprintf("REDIS_DSN=%s\n", BuildRedisDsn(expectedBaseConfig.redisOptions))
 		envFileContent += fmt.Sprintf("SCORE_STORAGE_API_HOST=%s\n", expectedBaseConfig.scoreStorageApiHost)
 		envFileContent += fmt.Sprintf("AUTHORIZER_HOST=%s\n", expectedBaseConfig.authorizerHost)
+		envFileContent += fmt.Sprintf("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES=%d\n", int(expectedBaseConfig.repeatScoreChangesTimeframe.Seconds()))
 
 		testEnvFilename := "TestLoadBaseConfigFromFile.env"
 		err := os.WriteFile(testEnvFilename, []byte(envFileContent), 0644)
@@ -85,6 +89,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("REDIS_DSN", "")
 		_ = os.Setenv("SCORE_STORAGE_API_HOST", "")
 		_ = os.Setenv("AUTHORIZER_HOST", "")
+		_ = os.Setenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES", "")
 
 		baseConfig, err := LoadBaseConfig("", testClientName)
 
@@ -117,6 +122,11 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 			t, baseConfig.authorizerHost,
 			"Expected for empty baseConfig.authorizerHost, actual %s", baseConfig.authorizerHost,
 		)
+
+		assert.Emptyf(
+			t, baseConfig.repeatScoreChangesTimeframe,
+			"Expected for empty baseConfig.repeatScoreChangesTimeframe, actual %s", baseConfig.repeatScoreChangesTimeframe, )
+
 	})
 
 	t.Run("empty KAFKA_HOST", func(t *testing.T) {
@@ -127,6 +137,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("REDIS_DSN", "")
 		_ = os.Setenv("SCORE_STORAGE_API_HOST", "")
 		_ = os.Setenv("AUTHORIZER_HOST", "")
+		_ = os.Setenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES", "")
 
 		config, err := LoadBaseConfig("", testClientName)
 
@@ -267,6 +278,7 @@ func assertBaseConfig(t *testing.T, expected BaseConfig, actual BaseConfig) {
 	assert.Equal(t, expected.authorizerHost, actual.authorizerHost)
 	assert.Equal(t, expected.redisOptions, actual.redisOptions)
 	assert.Equal(t, expected.scoreStorageApiHost, actual.scoreStorageApiHost)
+	assert.Equal(t, expected.repeatScoreChangesTimeframe, actual.repeatScoreChangesTimeframe)
 }
 
 func BuildRedisDsn(options *redis.Options) string {

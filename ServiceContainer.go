@@ -83,6 +83,17 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 			out:              out,
 			serviceContainer: container,
 			repository:       container.UserRepository,
+			scoreClient:      container.ScoreClient,
+			scoreChangedEventComposer: &ScoreChangeEventComposer{
+				out:           out,
+				redis:         redisClient,
+				storageExpire: config.repeatScoreChangesTimeframe,
+			},
+			scoreChangedMessageIdStorage: &ScoreChangedMessageIdStorage{
+				out:           out,
+				redis:         redisClient,
+				storageExpire: config.repeatScoreChangesTimeframe,
+			},
 		},
 		reader: kafka.NewReader(
 			kafka.ReaderConfig{
