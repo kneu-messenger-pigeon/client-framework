@@ -80,7 +80,7 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 	)
 
 	if err != nil {
-		_, _ = fmt.Fprintf(handler.out, "ScoreChangedAction return error: %v", err)
+		_, _ = fmt.Fprintf(handler.out, "ScoreChangedAction return error: %v\n", err)
 	}
 
 	if messageId != "" || previousMessageId != "" {

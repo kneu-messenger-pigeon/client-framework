@@ -54,6 +54,6 @@ func (handler *UserAuthorizedEventHandler) callControllerAction(event *events.Us
 	}
 
 	if err != nil {
-		_, _ = fmt.Fprintf(handler.out, "UserAuthorizedAction return error: %v", err)
+		_, _ = fmt.Fprintf(handler.out, "UserAuthorizedAction return error: %v\n", err)
 	}
 }
