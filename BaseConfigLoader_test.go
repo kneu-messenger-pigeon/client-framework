@@ -21,6 +21,7 @@ var expectedBaseConfig = BaseConfig{
 	scoreStorageApiHost:         "http://localhost:8080",
 	authorizerHost:              "http://localhost:8082",
 	repeatScoreChangesTimeframe: time.Minute * 5,
+	commitThreshold:             100,
 	redisOptions: &redis.Options{
 		Network: "tcp",
 		Addr:    "REDIS:6379",
@@ -38,6 +39,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("SCORE_STORAGE_API_HOST", expectedBaseConfig.scoreStorageApiHost)
 		_ = os.Setenv("AUTHORIZER_HOST", expectedBaseConfig.authorizerHost)
 		_ = os.Setenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES", strconv.Itoa(int(expectedBaseConfig.repeatScoreChangesTimeframe.Seconds())))
+		_ = os.Setenv("COMMIT_THRESHOLD", strconv.Itoa(expectedBaseConfig.commitThreshold))
 
 		baseConfig, err := LoadBaseConfig("", testClientName)
 
@@ -58,6 +60,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Unsetenv("SCORE_STORAGE_API_HOST")
 		_ = os.Unsetenv("AUTHORIZER_HOST")
 		_ = os.Unsetenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES")
+		_ = os.Unsetenv("COMMIT_THRESHOLD")
 
 		envFileContent += fmt.Sprintf("APP_SECRET=%s\n", expectedBaseConfig.appSecret)
 		envFileContent += fmt.Sprintf("KAFKA_HOST=%s\n", expectedBaseConfig.kafkaHost)
@@ -65,6 +68,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		envFileContent += fmt.Sprintf("SCORE_STORAGE_API_HOST=%s\n", expectedBaseConfig.scoreStorageApiHost)
 		envFileContent += fmt.Sprintf("AUTHORIZER_HOST=%s\n", expectedBaseConfig.authorizerHost)
 		envFileContent += fmt.Sprintf("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES=%d\n", int(expectedBaseConfig.repeatScoreChangesTimeframe.Seconds()))
+		envFileContent += fmt.Sprintf("COMMIT_THRESHOLD=%d\n", expectedBaseConfig.commitThreshold)
 
 		testEnvFilename := "TestLoadBaseConfigFromFile.env"
 		err := os.WriteFile(testEnvFilename, []byte(envFileContent), 0644)
@@ -90,6 +94,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("SCORE_STORAGE_API_HOST", "")
 		_ = os.Setenv("AUTHORIZER_HOST", "")
 		_ = os.Setenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES", "")
+		_ = os.Setenv("COMMIT_THRESHOLD", "")
 
 		baseConfig, err := LoadBaseConfig("", testClientName)
 
@@ -125,7 +130,13 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 
 		assert.Emptyf(
 			t, baseConfig.repeatScoreChangesTimeframe,
-			"Expected for empty baseConfig.repeatScoreChangesTimeframe, actual %s", baseConfig.repeatScoreChangesTimeframe, )
+			"Expected for empty baseConfig.repeatScoreChangesTimeframe, actual %s", baseConfig.repeatScoreChangesTimeframe,
+		)
+
+		assert.Emptyf(
+			t, baseConfig.commitThreshold,
+			"Expected for empty baseConfig.commitThreshold, actual %s", baseConfig.commitThreshold,
+		)
 
 	})
 
@@ -138,6 +149,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("SCORE_STORAGE_API_HOST", "")
 		_ = os.Setenv("AUTHORIZER_HOST", "")
 		_ = os.Setenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES", "")
+		_ = os.Setenv("COMMIT_THRESHOLD", "")
 
 		config, err := LoadBaseConfig("", testClientName)
 
@@ -166,6 +178,11 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 			"Expected for empty config.authorizerHost, actual %s", config.authorizerHost,
 		)
 
+		assert.Emptyf(
+			t, config.commitThreshold,
+			"Expected for empty config.authorizerHost, actual %s", config.authorizerHost,
+		)
+
 	})
 
 	t.Run("empty SCORE_STORAGE_API_HOST", func(t *testing.T) {
@@ -174,6 +191,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("SCORE_STORAGE_API_HOST", "")
 		_ = os.Setenv("AUTHORIZER_HOST", "")
 		_ = os.Setenv("TELEGRAM_TOKEN", "")
+		_ = os.Setenv("COMMIT_THRESHOLD", "")
 
 		config, err := LoadBaseConfig("", testClientName)
 
@@ -201,6 +219,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("SCORE_STORAGE_API_HOST", "dummy-not-empty")
 		_ = os.Setenv("AUTHORIZER_HOST", "dummy-not-empty")
 		_ = os.Setenv("REDIS_DSN", "")
+		_ = os.Setenv("COMMIT_THRESHOLD", "")
 
 		config, err := LoadBaseConfig("", testClientName)
 
@@ -231,6 +250,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("SCORE_STORAGE_API_HOST", "dummy-not-empty")
 		_ = os.Setenv("AUTHORIZER_HOST", "")
 		_ = os.Setenv("TELEGRAM_TOKEN", "")
+		_ = os.Setenv("COMMIT_THRESHOLD", "")
 
 		baseConfig, err := LoadBaseConfig("", testClientName)
 
@@ -250,6 +270,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Unsetenv("KAFKA_ATTEMPTS")
 		_ = os.Setenv("REDIS_DSN", "")
 		_ = os.Setenv("KAFKA_HOST", "")
+		_ = os.Setenv("COMMIT_THRESHOLD", "")
 
 		config, err := LoadBaseConfig("not-exists.env", testClientName)
 
@@ -279,6 +300,7 @@ func assertBaseConfig(t *testing.T, expected BaseConfig, actual BaseConfig) {
 	assert.Equal(t, expected.redisOptions, actual.redisOptions)
 	assert.Equal(t, expected.scoreStorageApiHost, actual.scoreStorageApiHost)
 	assert.Equal(t, expected.repeatScoreChangesTimeframe, actual.repeatScoreChangesTimeframe)
+	assert.Equal(t, expected.commitThreshold, actual.commitThreshold)
 }
 
 func BuildRedisDsn(options *redis.Options) string {

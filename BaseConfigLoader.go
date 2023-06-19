@@ -20,6 +20,7 @@ type BaseConfig struct {
 	authorizerHost              string
 	redisOptions                *redis.Options
 	repeatScoreChangesTimeframe time.Duration
+	commitThreshold             int
 }
 
 func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
@@ -36,8 +37,13 @@ func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
 	}
 
 	kafkaAttempts, err := strconv.Atoi(os.Getenv("KAFKA_ATTEMPTS"))
-	if kafkaAttempts == 0 || err != nil {
+	if kafkaAttempts <= 0 || err != nil {
 		kafkaAttempts = 0
+	}
+
+	commitThreshold, err := strconv.Atoi(os.Getenv("COMMIT_THRESHOLD"))
+	if commitThreshold <= 0 || err != nil {
+		commitThreshold = 0
 	}
 
 	repeatScoreChangesTimeframeSeconds, err := strconv.Atoi(os.Getenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES"))
@@ -54,6 +60,7 @@ func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
 		scoreStorageApiHost:         os.Getenv("SCORE_STORAGE_API_HOST"),
 		authorizerHost:              os.Getenv("AUTHORIZER_HOST"),
 		repeatScoreChangesTimeframe: time.Second * time.Duration(repeatScoreChangesTimeframeSeconds),
+		commitThreshold:             commitThreshold,
 	}
 
 	if config.appSecret == "" {

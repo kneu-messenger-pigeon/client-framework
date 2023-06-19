@@ -19,7 +19,7 @@ type KafkaConsumerProcessor struct {
 	disabled        bool
 }
 
-const defaultCommitThreshold = 10
+const defaultCommitThreshold = 1000
 
 func (processor *KafkaConsumerProcessor) Execute(ctx context.Context, wg *sync.WaitGroup) {
 	var err error

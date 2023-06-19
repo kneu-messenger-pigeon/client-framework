@@ -57,7 +57,8 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 	}
 
 	container.UserAuthorizedEventProcessor = &KafkaConsumerProcessor{
-		out: out,
+		out:             out,
+		commitThreshold: config.commitThreshold,
 		handler: &UserAuthorizedEventHandler{
 			out:              out,
 			clientName:       config.clientName,
@@ -79,7 +80,8 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 	}
 
 	container.ScoreChangedEventProcessor = &KafkaConsumerProcessor{
-		out: out,
+		out:             out,
+		commitThreshold: config.commitThreshold,
 		handler: &ScoreChangedEventHandler{
 			out:              out,
 			serviceContainer: container,

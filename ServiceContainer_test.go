@@ -21,6 +21,7 @@ func TestNewServiceContainer(t *testing.T) {
 			scoreStorageApiHost:         "localhost:8080",
 			authorizerHost:              "localhost:8081",
 			repeatScoreChangesTimeframe: time.Second * 1533,
+			commitThreshold:             953,
 			redisOptions: &redis.Options{
 				Network:    "tcp",
 				Addr:       "localhost:6379",
@@ -52,6 +53,7 @@ func TestNewServiceContainer(t *testing.T) {
 		userAuthorizedEventProcessor := serviceContainer.UserAuthorizedEventProcessor.(*KafkaConsumerProcessor)
 		assert.NotNil(t, userAuthorizedEventProcessor.reader)
 		assert.Equal(t, out, userAuthorizedEventProcessor.out)
+		assert.Equal(t, config.commitThreshold, userAuthorizedEventProcessor.commitThreshold)
 		assert.False(t, userAuthorizedEventProcessor.disabled)
 		assert.NotNil(t, userAuthorizedEventProcessor.handler)
 		assert.IsType(t, &UserAuthorizedEventHandler{}, userAuthorizedEventProcessor.handler)
@@ -68,6 +70,7 @@ func TestNewServiceContainer(t *testing.T) {
 		scoreChangedEventProcessor := serviceContainer.ScoreChangedEventProcessor.(*KafkaConsumerProcessor)
 		assert.NotNil(t, scoreChangedEventProcessor.reader)
 		assert.Equal(t, out, scoreChangedEventProcessor.out)
+		assert.Equal(t, config.commitThreshold, scoreChangedEventProcessor.commitThreshold)
 		assert.False(t, scoreChangedEventProcessor.disabled)
 		assert.NotNil(t, scoreChangedEventProcessor.handler)
 
