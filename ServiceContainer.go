@@ -2,6 +2,7 @@ package framework
 
 import (
 	"github.com/kneu-messenger-pigeon/authorizer-client"
+	"github.com/kneu-messenger-pigeon/events"
 	"github.com/kneu-messenger-pigeon/score-client"
 	"github.com/redis/go-redis/v9"
 	"github.com/segmentio/kafka-go"
@@ -40,7 +41,7 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 		Client: config.clientName,
 		writer: &kafka.Writer{
 			Addr:     kafka.TCP(config.kafkaHost),
-			Topic:    "authorized_users",
+			Topic:    events.AuthorizedUsersTopic,
 			Balancer: &kafka.LeastBytes{},
 		},
 	}
@@ -67,7 +68,7 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 			kafka.ReaderConfig{
 				Brokers:     []string{config.kafkaHost},
 				GroupID:     config.clientName,
-				Topic:       "authorized_users",
+				Topic:       events.AuthorizedUsersTopic,
 				MinBytes:    10,
 				MaxBytes:    10e3,
 				MaxWait:     time.Second,
@@ -99,7 +100,7 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 			kafka.ReaderConfig{
 				Brokers:     []string{config.kafkaHost},
 				GroupID:     config.clientName,
-				Topic:       "scores_changes_feed",
+				Topic:       events.ScoresChangesFeedTopic,
 				MinBytes:    10,
 				MaxBytes:    10e3,
 				MaxWait:     time.Second,
