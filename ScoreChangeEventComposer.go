@@ -23,7 +23,7 @@ type ScoreChangeEventComposer struct {
 	storageExpire time.Duration
 }
 
-func (composer *ScoreChangeEventComposer) Compose(event *events.ScoreChangedEvent, currentScore *scoreApi.Score) scoreApi.Score {
+func (composer *ScoreChangeEventComposer) Compose(event *events.ScoreChangedEvent, currentScore *scoreApi.Score) *scoreApi.Score {
 	ctx := context.Background()
 	storageScoreKey := composer.getStorageKey(event)
 
@@ -35,7 +35,7 @@ func (composer *ScoreChangeEventComposer) Compose(event *events.ScoreChangedEven
 		changedScoreFieldName = ScoreSecondFieldName
 	} else {
 		_, _ = fmt.Fprintf(composer.out, "Wrong lesson part, storedKey %s, event:  %v", storageScoreKey, event)
-		return scoreApi.Score{}
+		return &scoreApi.Score{}
 	}
 
 	var scoreValueToSet string
@@ -79,7 +79,8 @@ func (composer *ScoreChangeEventComposer) Compose(event *events.ScoreChangedEven
 			previousScore.SecondScore = parseScore(value)
 		}
 	}
-	return previousScore
+
+	return &previousScore
 }
 
 func (composer *ScoreChangeEventComposer) getStorageKey(event *events.ScoreChangedEvent) string {

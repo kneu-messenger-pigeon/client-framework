@@ -3,12 +3,16 @@ package framework
 import (
 	"bytes"
 	"errors"
+	"github.com/alicebob/miniredis/v2"
 	"github.com/kneu-messenger-pigeon/client-framework/mocks"
 	"github.com/kneu-messenger-pigeon/client-framework/models"
 	"github.com/kneu-messenger-pigeon/events"
 	scoreApi "github.com/kneu-messenger-pigeon/score-api"
 	"github.com/kneu-messenger-pigeon/score-client"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
+	"runtime"
+	"strings"
 	"testing"
 	"time"
 )
@@ -78,7 +82,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			"chat-message-id-2",
 		}
 
-		previousScore := scoreApi.Score{}
+		previousScore := &scoreApi.Score{}
 		clientController := mocks.NewClientControllerInterface(t)
 
 		userRepository := mocks.NewUserRepositoryInterface(t)
@@ -108,9 +112,9 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			},
 		}
 
-		clientController.On("ScoreChangedAction", chatIds[0], "", &disciplineScore, &previousScore).
+		clientController.On("ScoreChangedAction", chatIds[0], "", &disciplineScore, previousScore).
 			Return(nil, expectedMessageIds[0])
-		clientController.On("ScoreChangedAction", chatIds[1], "", &disciplineScore, &previousScore).
+		clientController.On("ScoreChangedAction", chatIds[1], "", &disciplineScore, previousScore).
 			Return(nil, expectedMessageIds[1])
 
 		err := handler.Handle(&event)
@@ -167,12 +171,12 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			"test-chat-id-2",
 		}
 
-		expectedMessageIds := []string{
+		existsMessageIds := []string{
 			"chat-message-id-1",
 			"chat-message-id-2",
 		}
 
-		previousScore := scoreApi.Score{}
+		previousScore := &scoreApi.Score{}
 
 		clientController := mocks.NewClientControllerInterface(t)
 
@@ -188,12 +192,9 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		messageIdStorage := mocks.NewScoreChangedMessageIdStorageInterface(t)
 		messageIdStorage.On("GetAll", event.StudentId, event.LessonId).
 			Return(models.ScoreChangedMessageMap{
-				chatIds[0]: expectedMessageIds[0],
-				chatIds[1]: expectedMessageIds[1],
+				chatIds[0]: existsMessageIds[0],
+				chatIds[1]: existsMessageIds[1],
 			})
-
-		messageIdStorage.On("Set", event.StudentId, event.LessonId, chatIds[0], expectedMessageIds[0]).Return()
-		messageIdStorage.On("Set", event.StudentId, event.LessonId, chatIds[1], expectedMessageIds[1]).Return()
 
 		handler := ScoreChangedEventHandler{
 			out:                          &bytes.Buffer{},
@@ -206,15 +207,18 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			},
 		}
 
-		clientController.On("ScoreChangedAction", chatIds[0], expectedMessageIds[0], &disciplineScore, &previousScore).
-			Return(nil, expectedMessageIds[0])
-		clientController.On("ScoreChangedAction", chatIds[1], expectedMessageIds[1], &disciplineScore, &previousScore).
-			Return(nil, expectedMessageIds[1])
+		clientController.On("ScoreChangedAction", chatIds[0], existsMessageIds[0], &disciplineScore, previousScore).
+			Return(nil, existsMessageIds[0])
+		clientController.On("ScoreChangedAction", chatIds[1], existsMessageIds[1], &disciplineScore, previousScore).
+			Return(nil, existsMessageIds[1])
 
 		err := handler.Handle(&event)
 		// wait for async coroutine call
 		time.Sleep(time.Millisecond * 40)
 		assert.NoError(t, err)
+
+		// no changes - no need to save in storage
+		messageIdStorage.AssertNotCalled(t, "Set")
 	})
 
 	t.Run("success_created_scores_remove_previous_message", func(t *testing.T) {
@@ -270,7 +274,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			"chat-message-id-2",
 		}
 
-		previousScore := scoreApi.Score{}
+		previousScore := &scoreApi.Score{}
 
 		clientController := mocks.NewClientControllerInterface(t)
 
@@ -304,9 +308,9 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			},
 		}
 
-		clientController.On("ScoreChangedAction", chatIds[0], previousMessageIds[0], &disciplineScore, &previousScore).
+		clientController.On("ScoreChangedAction", chatIds[0], previousMessageIds[0], &disciplineScore, previousScore).
 			Return(nil, "")
-		clientController.On("ScoreChangedAction", chatIds[1], previousMessageIds[1], &disciplineScore, &previousScore).
+		clientController.On("ScoreChangedAction", chatIds[1], previousMessageIds[1], &disciplineScore, previousScore).
 			Return(nil, "")
 
 		err := handler.Handle(&event)
@@ -366,14 +370,16 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		chatIds := []string{
 			"test-chat-id-1",
 			"test-chat-id-2",
+			"test-chat-id-3",
 		}
 
 		expectedMessageIds := []string{
 			"chat-message-id-1",
 			"chat-message-id-2",
+			"chat-message-id-3",
 		}
 
-		previousScore := scoreApi.Score{}
+		previousScore := &scoreApi.Score{}
 		clientController := mocks.NewClientControllerInterface(t)
 
 		userRepository := mocks.NewUserRepositoryInterface(t)
@@ -392,6 +398,14 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		messageIdStorage.On("Set", event.StudentId, event.LessonId, chatIds[0], expectedMessageIds[0]).Return()
 		messageIdStorage.On("Set", event.StudentId, event.LessonId, chatIds[1], expectedMessageIds[1]).Return()
 
+		clientController.On("ScoreChangedAction", chatIds[0], "", &disciplineScore, previousScore).
+			Return(expectedError, expectedMessageIds[0])
+		clientController.On("ScoreChangedAction", chatIds[1], "", &disciplineScore, previousScore).
+			Return(nil, expectedMessageIds[1])
+
+		clientController.On("ScoreChangedAction", chatIds[2], "", &disciplineScore, previousScore).
+			Return(expectedError, "")
+
 		handler := ScoreChangedEventHandler{
 			out:                          out,
 			repository:                   userRepository,
@@ -403,17 +417,14 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			},
 		}
 
-		clientController.On("ScoreChangedAction", chatIds[0], "", &disciplineScore, &previousScore).
-			Return(expectedError, expectedMessageIds[0])
-		clientController.On("ScoreChangedAction", chatIds[1], "", &disciplineScore, &previousScore).
-			Return(nil, expectedMessageIds[1])
-
 		err := handler.Handle(&event)
 		// wait for async coroutine call
 		time.Sleep(time.Millisecond * 40)
 		assert.NoError(t, err)
 
 		assert.Contains(t, out.String(), expectedError.Error())
+		assert.Equal(t, 2, strings.Count(out.String(), expectedError.Error()))
+		messageIdStorage.AssertNotCalled(t, "Set", event.StudentId, event.LessonId, chatIds[2], expectedMessageIds[2])
 	})
 
 	t.Run("success_score_client_err", func(t *testing.T) {
@@ -481,6 +492,190 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			serviceContainer: &ServiceContainer{},
 		}
 		err := handler.Handle(&events.ScoreChangedEvent{})
+		assert.NoError(t, err)
+	})
+
+	t.Run("success_created_scores_race_condition", func(t *testing.T) {
+		event1 := events.ScoreChangedEvent{
+			ScoreEvent: events.ScoreEvent{
+				Id:           112233,
+				StudentId:    123,
+				LessonId:     150,
+				LessonPart:   1,
+				DisciplineId: 234,
+				Year:         2028,
+				Semester:     1,
+				ScoreValue: events.ScoreValue{
+					Value:     2.5,
+					IsAbsent:  false,
+					IsDeleted: false,
+				},
+				UpdatedAt: time.Date(2028, time.Month(11), 18, 14, 30, 40, 0, time.Local),
+				SyncedAt:  time.Date(2028, time.Month(11), 18, 14, 35, 13, 0, time.Local),
+			},
+			Previous: events.ScoreValue{
+				Value:     0,
+				IsAbsent:  false,
+				IsDeleted: true,
+			},
+		}
+
+		event2 := events.ScoreChangedEvent{
+			ScoreEvent: events.ScoreEvent{
+				Id:           event1.Id,
+				Year:         event1.Year,
+				Semester:     event1.Semester,
+				StudentId:    event1.StudentId,
+				LessonId:     event1.LessonId,
+				DisciplineId: event1.DisciplineId,
+				LessonPart:   2,
+				ScoreValue: events.ScoreValue{
+					Value:     3,
+					IsAbsent:  false,
+					IsDeleted: false,
+				},
+				UpdatedAt: time.Date(2028, time.Month(11), 18, 14, 30, 40, 0, time.Local),
+				SyncedAt:  time.Date(2028, time.Month(11), 18, 14, 35, 13, 0, time.Local),
+			},
+			Previous: events.ScoreValue{
+				Value:     0,
+				IsAbsent:  false,
+				IsDeleted: true,
+			},
+		}
+
+		disciplineScore1 := scoreApi.DisciplineScore{
+			Discipline: scoreApi.Discipline{
+				Id:   int(event1.DisciplineId),
+				Name: "Капітал!",
+			},
+			Score: scoreApi.Score{
+				Lesson: scoreApi.Lesson{
+					Id:   int(event1.LessonId),
+					Date: time.Date(2023, time.Month(2), 12, 0, 0, 0, 0, time.Local),
+					Type: scoreApi.LessonType{
+						Id:        5,
+						ShortName: "МК",
+						LongName:  "Модульний контроль.",
+					},
+				},
+				FirstScore: floatPointer(2.5),
+			},
+		}
+
+		disciplineScore2 := scoreApi.DisciplineScore{
+			Discipline: scoreApi.Discipline{
+				Id:   int(event1.DisciplineId),
+				Name: "Капітал!",
+			},
+			Score: scoreApi.Score{
+				Lesson: scoreApi.Lesson{
+					Id:   int(event1.LessonId),
+					Date: time.Date(2023, time.Month(2), 12, 0, 0, 0, 0, time.Local),
+					Type: scoreApi.LessonType{
+						Id:        5,
+						ShortName: "МК",
+						LongName:  "Модульний контроль.",
+					},
+				},
+				FirstScore: floatPointer(2.5),
+			},
+		}
+
+		chatIds := []string{
+			"test-chat-id-1",
+			"test-chat-id-2",
+		}
+
+		createdMessageIds := []string{
+			"chat-message-id-1",
+			"chat-message-id-2",
+		}
+
+		previousScore := scoreApi.Score{
+			Lesson: disciplineScore1.Score.Lesson,
+		}
+
+		userRepository := mocks.NewUserRepositoryInterface(t)
+		userRepository.On("GetClientUserIds", event1.StudentId).Return(chatIds)
+
+		scoreClient := score.NewMockClientInterface(t)
+		scoreClient.
+			On("GetStudentScore", uint32(event1.StudentId), int(event1.DisciplineId), int(event1.LessonId)).
+			Once().
+			Return(disciplineScore1, nil)
+
+		redisClient := redis.NewClient(&redis.Options{
+			Network: "tcp",
+			Addr:    miniredis.RunT(t).Addr(),
+		})
+
+		handler := ScoreChangedEventHandler{
+			out:         &bytes.Buffer{},
+			repository:  userRepository,
+			scoreClient: scoreClient,
+			scoreChangedEventComposer: &ScoreChangeEventComposer{
+				out:           &bytes.Buffer{},
+				redis:         redisClient,
+				storageExpire: time.Minute * 5,
+			},
+			scoreChangedMessageIdStorage: &ScoreChangedMessageIdStorage{
+				out:           &bytes.Buffer{},
+				redis:         redisClient,
+				storageExpire: time.Minute,
+			},
+			serviceContainer: &ServiceContainer{},
+		}
+
+		firstMessageSendingWait := make(chan time.Time)
+
+		clientController := mocks.NewClientControllerInterface(t)
+		clientController.On("ScoreChangedAction", chatIds[0], "", &disciplineScore1, &previousScore).
+			Once().WaitUntil(firstMessageSendingWait).
+			Return(nil, createdMessageIds[0])
+
+		clientController.On("ScoreChangedAction", chatIds[1], "", &disciplineScore1, &previousScore).
+			Once().WaitUntil(firstMessageSendingWait).
+			Return(nil, createdMessageIds[1])
+
+		var err error
+
+		handler.serviceContainer.SetController(clientController)
+
+		err = handler.Handle(&event1)
+		assert.NoError(t, err)
+		runtime.Gosched()
+		time.Sleep(time.Millisecond * 40)
+		clientController.AssertNumberOfCalls(t, "ScoreChangedAction", 1)
+
+		scoreClient.On("GetStudentScore", uint32(event2.StudentId), int(event2.DisciplineId), int(event2.LessonId)).
+			Maybe().
+			Return(disciplineScore1, nil)
+
+		// process seconds message in queue
+		clientController.On("ScoreChangedAction", chatIds[0], createdMessageIds[0], &disciplineScore2, &previousScore).
+			Once().
+			Return(nil, createdMessageIds[0])
+
+		clientController.On("ScoreChangedAction", chatIds[1], createdMessageIds[1], &disciplineScore2, &previousScore).
+			Once().
+			Return(nil, createdMessageIds[1])
+
+		err = handler.Handle(&event2)
+		runtime.Gosched() // wait for async coroutine call
+		time.Sleep(time.Millisecond * 100)
+
+		// ensure that handler for second iteration message was not called yet (while first iteration isn't finished)
+		clientController.AssertNotCalled(t, "ScoreChangedAction", chatIds[0], createdMessageIds[0], &disciplineScore2, &previousScore)
+		clientController.AssertNotCalled(t, "ScoreChangedAction", chatIds[1], createdMessageIds[1], &disciplineScore2, &previousScore)
+
+		// finish handlers from first iteration and expect it will run handlers from second iteration.
+		firstMessageSendingWait <- time.Time{}
+		firstMessageSendingWait <- time.Time{}
+
+		runtime.Gosched() // wait for async coroutine call
+		time.Sleep(time.Millisecond * 100)
+
 		assert.NoError(t, err)
 	})
 }

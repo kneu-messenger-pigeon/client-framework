@@ -15,6 +15,7 @@ type ScoreChangedEventHandler struct {
 	scoreClient                  score.ClientInterface
 	scoreChangedEventComposer    ScoreChangeEventComposerInterface
 	scoreChangedMessageIdStorage ScoreChangedMessageIdStorageInterface
+	multiMutex                   MultiMutex
 }
 
 type ScoreChangedEventPayload struct {
@@ -57,33 +58,31 @@ func (handler *ScoreChangedEventHandler) Handle(s any) error {
 		return err
 	}
 
-	previousScore := handler.scoreChangedEventComposer.Compose(event, &disciplineScore.Score)
-
-	previousMessageIds := handler.scoreChangedMessageIdStorage.GetAll(event.StudentId, event.LessonId)
-
-	for _, chatId := range chatIds {
-		go handler.callControllerAction(
-			event.StudentId, chatId, previousMessageIds[chatId],
-			&disciplineScore, &previousScore,
-		)
-	}
-
+	go handler.callControllerAction(event, &chatIds, &disciplineScore)
 	return nil
 }
 
 func (handler *ScoreChangedEventHandler) callControllerAction(
-	studentId uint, chatId string, previousMessageId string,
-	score *scoreApi.DisciplineScore, previousScore *scoreApi.Score,
+	event *events.ScoreChangedEvent, chatIds *[]string,
+	disciplineScore *scoreApi.DisciplineScore,
 ) {
-	err, messageId := handler.serviceContainer.ClientController.ScoreChangedAction(
-		chatId, previousMessageId, score, previousScore,
-	)
+	mutex := handler.multiMutex.Get(event.Id)
+	mutex.Lock()
+	defer mutex.Unlock()
 
-	if err != nil {
-		_, _ = fmt.Fprintf(handler.out, "ScoreChangedAction return error: %v\n", err)
-	}
+	previousScore := handler.scoreChangedEventComposer.Compose(event, &disciplineScore.Score)
+	previousMessageIds := handler.scoreChangedMessageIdStorage.GetAll(event.StudentId, event.LessonId)
+	for _, chatId := range *chatIds {
+		err, newMessageId := handler.serviceContainer.ClientController.ScoreChangedAction(
+			chatId, previousMessageIds[chatId], disciplineScore, previousScore,
+		)
 
-	if messageId != "" || previousMessageId != "" {
-		handler.scoreChangedMessageIdStorage.Set(studentId, uint(score.Score.Lesson.Id), chatId, messageId)
+		if err != nil {
+			_, _ = fmt.Fprintf(handler.out, "ScoreChangedAction return error: %v\n", err)
+		}
+
+		if newMessageId != previousMessageIds[chatId] && (newMessageId != "" || err == nil) {
+			handler.scoreChangedMessageIdStorage.Set(event.StudentId, event.LessonId, chatId, newMessageId)
+		}
 	}
 }

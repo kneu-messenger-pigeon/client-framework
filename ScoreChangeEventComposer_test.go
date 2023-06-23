@@ -75,7 +75,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			actualPreviousScore := composer.Compose(event, currentScore)
-			assert.Equal(t, expectedPreviousScore, actualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *actualPreviousScore)
 			assert.Empty(t, out.String())
 		})
 
@@ -131,7 +131,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 
 			actualPreviousScore := composer.Compose(event, currentScore)
 
-			assert.Equal(t, expectedPreviousScore, actualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *actualPreviousScore)
 			assert.Empty(t, out.String())
 		})
 
@@ -189,7 +189,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 
 			actualPreviousScore := composer.Compose(event, currentScore)
 
-			assert.Equal(t, expectedPreviousScore, actualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *actualPreviousScore)
 			assert.Empty(t, out.String())
 		})
 
@@ -242,7 +242,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 
 			actualPreviousScore := composer.Compose(event, currentScore)
 
-			assert.Equal(t, expectedPreviousScore, actualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *actualPreviousScore)
 			assert.Empty(t, out.String())
 			assert.NotEqual(t, expectedPreviousScore.IsAbsent, currentScore.IsAbsent)
 			assert.NotEqual(t, expectedPreviousScore.IsDeleted(), currentScore.IsDeleted())
@@ -299,7 +299,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 
 			actualPreviousScore := composer.Compose(event, currentScore)
 
-			assert.Equal(t, expectedPreviousScore, actualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *actualPreviousScore)
 			assert.Empty(t, out.String())
 		})
 	})
@@ -337,7 +337,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 
 			actualPreviousScore := composer.Compose(event, currentScore)
 
-			assert.Equal(t, expectedPreviousScore, actualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *actualPreviousScore)
 			assert.Contains(t, out.String(), "Wrong lesson part")
 		})
 
@@ -381,7 +381,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 
 			actualPreviousScore := composer.Compose(event, currentScore)
 
-			assert.Equal(t, expectedPreviousScore, actualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *actualPreviousScore)
 			expectedError := "Redis error while composing changed scores: error WRONGTYPE Operation against a key holding the wrong kind of value, storageKey: SC:154:143"
 			assert.Equal(t, out.String(), expectedError)
 		})
@@ -440,7 +440,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step1ActualPreviousScore := composer.Compose(step1Score1, step1CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step1ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step1ActualPreviousScore)
 			/** End step1 */
 
 			/** Start step2 */
@@ -475,7 +475,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step2ActualPreviousScore := composer.Compose(step2Score2, step2CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step2ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step2ActualPreviousScore)
 			/** End step2 */
 
 			/** Start step3 */
@@ -508,7 +508,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step3ActualPreviousScore := composer.Compose(step3RemoveScore1, step3CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step3ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step3ActualPreviousScore)
 			/** End step3 */
 
 			/** Start step4 */
@@ -541,7 +541,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step4ActualPreviousScore := composer.Compose(step4RemoveScore2, step4CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step4ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step4ActualPreviousScore)
 			/** End step4 */
 		})
 
@@ -598,7 +598,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step1ActualPreviousScore := composer.Compose(step1Score1, step1CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step1ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step1ActualPreviousScore)
 			/** End step1 */
 
 			/** Start step2 */
@@ -633,7 +633,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step2ActualPreviousScore := composer.Compose(step2Score2, step2CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step2ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step2ActualPreviousScore)
 			/** End step2 */
 
 			/** Start step3 */
@@ -668,7 +668,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step3ActualPreviousScore := composer.Compose(step3RemoveScore1, step3CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step3ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step3ActualPreviousScore)
 			/** End step3 */
 		})
 
@@ -725,7 +725,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step1ActualPreviousScore := composer.Compose(step1Score1, step1CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step1ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step1ActualPreviousScore)
 			/** End step1 */
 
 			/** Start step2 */
@@ -759,7 +759,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step2ActualPreviousScore := composer.Compose(step2Score2, step2CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step2ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step2ActualPreviousScore)
 			/** End step2 */
 
 			/** Start step3 */
@@ -792,7 +792,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step3ActualPreviousScore := composer.Compose(step3RemoveScore1, step3CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step3ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step3ActualPreviousScore)
 			/** End step3 */
 
 			/** Start step4 */
@@ -825,7 +825,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step4ActualPreviousScore := composer.Compose(step4RemoveScore2, step4CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step4ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step4ActualPreviousScore)
 			/** End step4 */
 		})
 
@@ -886,7 +886,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step1ActualPreviousScore := composer.Compose(step1Score1, step1CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step1ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step1ActualPreviousScore)
 			/** End step1 */
 
 			/** Start step2 */
@@ -921,7 +921,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step2ActualPreviousScore := composer.Compose(step2Score2, step2CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step2ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step2ActualPreviousScore)
 			/** End step2 */
 
 			/** Start step3 */
@@ -954,7 +954,7 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 			}
 
 			step3ActualPreviousScore := composer.Compose(step3RemoveScore1, step3CurrentScore)
-			assert.Equal(t, expectedPreviousScore, step3ActualPreviousScore)
+			assert.Equal(t, expectedPreviousScore, *step3ActualPreviousScore)
 			/** End step3 */
 		})
 

@@ -18,7 +18,12 @@ func TestEventLoopExecute(t *testing.T) {
 		matchWaitGroup := mock.MatchedBy(func(wg *sync.WaitGroup) bool { wg.Done(); return true })
 
 		processor := mocks.NewKafkaConsumerProcessorInterface(t)
-		processor.On("Execute", matchContext, matchWaitGroup).Return().Times(2)
+		processorPool := [ScoreChangedEventProcessorCount]KafkaConsumerProcessorInterface{}
+		for i := 0; i < len(processorPool); i++ {
+			processorPool[i] = processor
+		}
+
+		processor.On("Execute", matchContext, matchWaitGroup).Return().Times(1 + len(processorPool))
 
 		clientController := mocks.NewClientControllerInterface(t)
 		clientController.On("Execute", matchContext, matchWaitGroup).Return().Times(1)
@@ -37,9 +42,9 @@ func TestEventLoopExecute(t *testing.T) {
 					redis: redisClient,
 				},
 
-				UserAuthorizedEventProcessor: processor,
-				ScoreChangedEventProcessor:   processor,
-				ClientController:             clientController,
+				UserAuthorizedEventProcessor:   processor,
+				ScoreChangedEventProcessorPool: processorPool,
+				ClientController:               clientController,
 			},
 		}
 

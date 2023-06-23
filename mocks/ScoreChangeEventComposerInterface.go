@@ -16,14 +16,16 @@ type ScoreChangeEventComposerInterface struct {
 }
 
 // Compose provides a mock function with given fields: event, currentScore
-func (_m *ScoreChangeEventComposerInterface) Compose(event *events.ScoreChangedEvent, currentScore *scoreApi.Score) scoreApi.Score {
+func (_m *ScoreChangeEventComposerInterface) Compose(event *events.ScoreChangedEvent, currentScore *scoreApi.Score) *scoreApi.Score {
 	ret := _m.Called(event, currentScore)
 
-	var r0 scoreApi.Score
-	if rf, ok := ret.Get(0).(func(*events.ScoreChangedEvent, *scoreApi.Score) scoreApi.Score); ok {
+	var r0 *scoreApi.Score
+	if rf, ok := ret.Get(0).(func(*events.ScoreChangedEvent, *scoreApi.Score) *scoreApi.Score); ok {
 		r0 = rf(event, currentScore)
 	} else {
-		r0 = ret.Get(0).(scoreApi.Score)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*scoreApi.Score)
+		}
 	}
 
 	return r0

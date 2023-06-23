@@ -10,15 +10,17 @@ import (
 	"time"
 )
 
+const ScoreChangedEventProcessorCount = 6
+
 type ServiceContainer struct {
-	UserRepository               *UserRepository
-	UserLogoutHandler            *UserLogoutHandler
-	AuthorizerClient             *authorizer.Client
-	ScoreClient                  *score.Client
-	UserAuthorizedEventProcessor KafkaConsumerProcessorInterface
-	ScoreChangedEventProcessor   KafkaConsumerProcessorInterface
-	Executor                     *Executor
-	ClientController             ClientControllerInterface
+	UserRepository                 *UserRepository
+	UserLogoutHandler              *UserLogoutHandler
+	AuthorizerClient               *authorizer.Client
+	ScoreClient                    *score.Client
+	UserAuthorizedEventProcessor   KafkaConsumerProcessorInterface
+	ScoreChangedEventProcessorPool [ScoreChangedEventProcessorCount]KafkaConsumerProcessorInterface
+	Executor                       *Executor
+	ClientController               ClientControllerInterface
 }
 
 func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
@@ -79,38 +81,41 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 		),
 	}
 
-	container.ScoreChangedEventProcessor = &KafkaConsumerProcessor{
-		out:             out,
-		commitThreshold: config.commitThreshold,
-		handler: &ScoreChangedEventHandler{
-			out:              out,
-			serviceContainer: container,
-			repository:       container.UserRepository,
-			scoreClient:      container.ScoreClient,
-			scoreChangedEventComposer: &ScoreChangeEventComposer{
-				out:           out,
-				redis:         redisClient,
-				storageExpire: config.repeatScoreChangesTimeframe,
-			},
-			scoreChangedMessageIdStorage: &ScoreChangedMessageIdStorage{
-				out:           out,
-				redis:         redisClient,
-				storageExpire: config.repeatScoreChangesTimeframe,
-			},
-		},
-		reader: kafka.NewReader(
-			kafka.ReaderConfig{
-				Brokers:     []string{config.kafkaHost},
-				GroupID:     config.clientName,
-				Topic:       events.ScoresChangesFeedTopic,
-				MinBytes:    10,
-				MaxBytes:    10e3,
-				MaxWait:     time.Second,
-				MaxAttempts: config.kafkaAttempts,
-				Dialer:      kafkaDialer,
-			},
-		),
+	scoreChangesReaderConfig := kafka.ReaderConfig{
+		Brokers:     []string{config.kafkaHost},
+		GroupID:     config.clientName,
+		Topic:       events.ScoresChangesFeedTopic,
+		MinBytes:    10,
+		MaxBytes:    10e3,
+		MaxWait:     time.Second,
+		MaxAttempts: config.kafkaAttempts,
+		Dialer:      kafkaDialer,
 	}
+
+	for i := 0; i < len(container.ScoreChangedEventProcessorPool); i++ {
+		container.ScoreChangedEventProcessorPool[i] = &KafkaConsumerProcessor{
+			out:             out,
+			commitThreshold: config.commitThreshold,
+			reader:          kafka.NewReader(scoreChangesReaderConfig),
+			handler: &ScoreChangedEventHandler{
+				out:              out,
+				serviceContainer: container,
+				repository:       container.UserRepository,
+				scoreClient:      container.ScoreClient,
+				scoreChangedEventComposer: &ScoreChangeEventComposer{
+					out:           out,
+					redis:         redisClient,
+					storageExpire: config.repeatScoreChangesTimeframe,
+				},
+				scoreChangedMessageIdStorage: &ScoreChangedMessageIdStorage{
+					out:           out,
+					redis:         redisClient,
+					storageExpire: config.repeatScoreChangesTimeframe,
+				},
+			},
+		}
+	}
+
 	container.Executor = &Executor{
 		out:              out,
 		serviceContainer: container,
