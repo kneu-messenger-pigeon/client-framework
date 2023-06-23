@@ -29,6 +29,24 @@ func TestFixed_Get_One(t *testing.T) {
 	assert.Equal(t, &multiMutex[key1], multiMutex.Get(key2))
 }
 
+func TestFixed_Get_Two(t *testing.T) {
+	key1 := uint(1)
+	key2 := key1 + 2
+	multiMutex := MultiMutex{}
+	m1 := multiMutex.Get(key1)
+	m1.Lock()
+	defer m1.Unlock()
+
+	m2 := multiMutex.Get(key2)
+	m2.Lock()
+	defer m2.Unlock()
+
+	assert.Equal(t, &multiMutex[key1], m1)
+	assert.Equal(t, &multiMutex[key2], m2)
+
+	assert.NotSame(t, m1, m2)
+}
+
 func TestFixed_Get_Race(t *testing.T) {
 	key1 := uint(1)
 	key2 := key1 + MultiMutexCount
