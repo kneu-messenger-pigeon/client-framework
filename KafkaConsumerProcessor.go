@@ -44,7 +44,7 @@ func (processor *KafkaConsumerProcessor) Execute(ctx context.Context, wg *sync.W
 
 	for ctx.Err() == nil {
 		message, err = processor.reader.FetchMessage(fetchContext)
-		if err == nil && expectedMessageKey == string(message.Key) {
+		if err == nil && events.GetEventName(message.Key) == expectedMessageKey {
 			err = json.Unmarshal(message.Value, &event)
 			if err == nil {
 				err = processor.handler.Handle(event)
