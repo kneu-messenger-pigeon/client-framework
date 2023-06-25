@@ -63,7 +63,7 @@ func (composer *ScoreChangeEventComposer) Compose(event *events.ScoreChangedEven
 	/** Read value from storage */
 	previousScore := scoreApi.Score{
 		Lesson: currentScore.Lesson,
-		// fallback value to actual current values if there is not previous value
+		// fallback value to actual current values if there is no previous value
 		FirstScore:  currentScore.FirstScore,
 		SecondScore: currentScore.SecondScore,
 		IsAbsent:    false,
