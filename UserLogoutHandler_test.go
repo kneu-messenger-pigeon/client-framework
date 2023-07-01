@@ -12,6 +12,14 @@ import (
 	"testing"
 )
 
+var deletedUserAuthorizedEvent = events.UserAuthorizedEvent{
+	StudentId:  0,
+	LastName:   "",
+	FirstName:  "",
+	MiddleName: "",
+	Gender:     events.UnknownGender,
+}
+
 func TestUserLogoutHandler_Handle(t *testing.T) {
 	var matchContext = mock.MatchedBy(func(ctx context.Context) bool { return true })
 
@@ -26,15 +34,9 @@ func TestUserLogoutHandler_Handle(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		expectedMessage := events.UserAuthorizedEvent{
-			Client:       "test-client",
-			ClientUserId: "test-client-id",
-			StudentId:    0,
-			LastName:     "",
-			FirstName:    "",
-			MiddleName:   "",
-			Gender:       events.UnknownGender,
-		}
+		expectedMessage := deletedUserAuthorizedEvent
+		expectedMessage.Client = "test-client"
+		expectedMessage.ClientUserId = "test-client-id"
 
 		writer := events.NewMockWriterInterface(t)
 		writer.On("WriteMessages", matchContext, messageMatcher(expectedMessage)).Return(nil)
@@ -50,15 +52,10 @@ func TestUserLogoutHandler_Handle(t *testing.T) {
 	})
 
 	t.Run("error", func(t *testing.T) {
-		expectedMessage := events.UserAuthorizedEvent{
-			Client:       "test-client",
-			ClientUserId: "test-client-id",
-			StudentId:    0,
-			LastName:     "",
-			FirstName:    "",
-			MiddleName:   "",
-			Gender:       events.UnknownGender,
-		}
+		expectedMessage := deletedUserAuthorizedEvent
+		expectedMessage.Client = "test-client"
+		expectedMessage.ClientUserId = "test-client-id"
+
 		expectedError := errors.New("test expected error")
 
 		writer := events.NewMockWriterInterface(t)

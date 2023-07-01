@@ -3,6 +3,7 @@ package framework
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/kneu-messenger-pigeon/events"
 	scoreApi "github.com/kneu-messenger-pigeon/score-api"
@@ -24,6 +25,99 @@ func TestScoreChangeEventComposer_Compose(t *testing.T) {
 	}
 
 	t.Run("empty_storage_single_event", func(t *testing.T) {
+		t.Run("create_and_delete_score", func(t *testing.T) {
+			createdEvent := &events.ScoreChangedEvent{
+				ScoreEvent: events.ScoreEvent{
+					Id:           112233,
+					StudentId:    123,
+					LessonId:     150,
+					LessonPart:   1,
+					DisciplineId: 234,
+					Year:         2028,
+					Semester:     1,
+					ScoreValue: events.ScoreValue{
+						Value:     2.5,
+						IsAbsent:  false,
+						IsDeleted: false,
+					},
+					UpdatedAt: updatedAt,
+					SyncedAt:  updatedAt.Add(time.Second * 3),
+				},
+				Previous: events.ScoreValue{
+					Value:     0,
+					IsAbsent:  false,
+					IsDeleted: true,
+				},
+			}
+
+			createdScore := &scoreApi.Score{
+				Lesson: scoreApi.Lesson{
+					Id:   int(createdEvent.LessonId),
+					Date: time.Date(2023, time.Month(2), 12, 0, 0, 0, 0, time.Local),
+					Type: scoreApi.LessonType{
+						Id:        5,
+						ShortName: "МК",
+						LongName:  "Модульний контроль.",
+					},
+				},
+				FirstScore: floatPointer(2.5),
+			}
+
+			deletedEvent := &events.ScoreChangedEvent{
+				ScoreEvent: events.ScoreEvent{
+					Id:           112233,
+					StudentId:    123,
+					LessonId:     150,
+					LessonPart:   1,
+					DisciplineId: 234,
+					Year:         2028,
+					Semester:     1,
+					ScoreValue: events.ScoreValue{
+						Value:     0,
+						IsAbsent:  false,
+						IsDeleted: true,
+					},
+					UpdatedAt: updatedAt.Add(time.Second),
+					SyncedAt:  updatedAt.Add(time.Second * 3),
+				},
+				Previous: events.ScoreValue{
+					Value:     0,
+					IsAbsent:  false,
+					IsDeleted: true,
+				},
+			}
+
+			deletedScore := &scoreApi.Score{
+				Lesson: scoreApi.Lesson{
+					Id:   int(createdEvent.LessonId),
+					Date: time.Date(2023, time.Month(2), 12, 0, 0, 0, 0, time.Local),
+					Type: scoreApi.LessonType{
+						Id:        5,
+						ShortName: "МК",
+						LongName:  "Модульний контроль.",
+					},
+				},
+			}
+
+			out := &bytes.Buffer{}
+			composer := ScoreChangeEventComposer{
+				out:           out,
+				redis:         newMiniRedis(t),
+				storageExpire: expectedExpire,
+			}
+
+			actualAfterCreated := composer.Compose(createdEvent, createdScore)
+			fmt.Printf("%v\n", actualAfterCreated)
+			actualAfterDeleted := composer.Compose(deletedEvent, deletedScore)
+			fmt.Printf("%v\n", actualAfterDeleted)
+			assert.True(t, actualAfterDeleted.IsDeleted())
+			assert.True(t, deletedScore.IsEqual(actualAfterDeleted))
+			redisS := composer.redis.HGetAll(context.Background(), "SC:150:123").Val()
+			fmt.Printf("%v\n", redisS)
+
+			assert.Empty(t, out.String())
+		})
+
 		t.Run("only_first_lesson_part__score_with_empty_storage", func(t *testing.T) {
 			event := &events.ScoreChangedEvent{
 				ScoreEvent: events.ScoreEvent{

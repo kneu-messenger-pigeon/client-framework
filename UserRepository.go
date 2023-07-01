@@ -25,16 +25,20 @@ func (repository *UserRepository) SaveUser(clientUserId string, student *models.
 	studentSerialized, err := proto.Marshal(student)
 	ctx := context.Background()
 	if err == nil {
+		clientUserKey := repository.getClientUserKey(clientUserId)
 		pipe := repository.redis.TxPipeline()
+
 		if previousStudent.Id != student.Id && previousStudent.Id != 0 {
-			pipe.Del(ctx, clientUserId)
-			pipe.SRem(ctx, student.GetIdString(), clientUserId)
+			pipe.SRem(ctx, repository.getStudentKey(previousStudent.Id), clientUserId)
 		}
 
-		if student.Id != 0 {
-			pipe.Set(ctx, clientUserId, studentSerialized, UserExpiration)
-			pipe.SAdd(ctx, student.GetIdString(), clientUserId)
-			pipe.Expire(ctx, student.GetIdString(), UserExpiration)
+		if student.Id == 0 {
+			pipe.Del(ctx, clientUserKey)
+		} else {
+			pipe.Set(ctx, clientUserKey, studentSerialized, UserExpiration)
+			newStudentKey := repository.getStudentKey(student.Id)
+			pipe.SAdd(ctx, newStudentKey, clientUserId)
+			pipe.Expire(ctx, newStudentKey, UserExpiration)
 		}
 
 		_, err = pipe.Exec(ctx)
@@ -54,15 +58,18 @@ func (repository *UserRepository) Commit() error {
 
 func (repository *UserRepository) GetStudent(clientUserId string) *models.Student {
 	ctx := context.Background()
-	studentSerialized, _ := repository.redis.GetEx(ctx, clientUserId, UserExpiration).Bytes()
+	studentSerialized, _ := repository.redis.GetEx(
+		ctx, repository.getClientUserKey(clientUserId),
+		UserExpiration,
+	).Bytes()
 
 	student := &models.Student{}
-	if len(studentSerialized) > 0 {
+	if studentSerialized != nil && len(studentSerialized) > 0 {
 		_ = proto.Unmarshal(studentSerialized, student)
 	}
 
 	if student.Id != 0 {
-		repository.redis.Expire(ctx, student.GetIdString(), UserExpiration)
+		repository.redis.Expire(ctx, repository.getStudentKey(student.Id), UserExpiration)
 	}
 
 	return student
@@ -72,7 +79,7 @@ func (repository *UserRepository) GetClientUserIds(studentId uint) []string {
 	if studentId != 0 {
 		result := repository.redis.SMembers(
 			context.Background(),
-			strconv.FormatUint(uint64(studentId), 10),
+			repository.getStudentKey(uint32(studentId)),
 		)
 
 		if result.Err() == nil {
@@ -81,4 +88,12 @@ func (repository *UserRepository) GetClientUserIds(studentId uint) []string {
 	}
 
 	return []string{}
+}
+
+func (repository *UserRepository) getStudentKey(studentId uint32) string {
+	return "st" + strconv.FormatUint(uint64(studentId), 10)
+}
+
+func (repository *UserRepository) getClientUserKey(clientUserId string) string {
+	return "cu" + clientUserId
 }

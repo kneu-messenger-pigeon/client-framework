@@ -29,9 +29,15 @@ type ScoreChangedMessageData struct {
 	Previous scoreApi.Score
 }
 
+var studentNamePrefixMap = map[Student_GenderType]string{
+	Student_FEMALE:  "Пані",
+	Student_MALE:    "Пане",
+	Student_UNKNOWN: "Пане",
+}
+
 func NewStudentMessageData(student *Student) StudentMessageData {
 	return StudentMessageData{
-		NamePrefix: student.GetNamePrefix(),
+		NamePrefix: studentNamePrefixMap[student.Gender],
 		Name:       student.FirstName,
 	}
 }
