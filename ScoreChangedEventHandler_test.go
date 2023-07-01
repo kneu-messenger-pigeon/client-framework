@@ -11,6 +11,7 @@ import (
 	"github.com/kneu-messenger-pigeon/score-client"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"runtime"
 	"strings"
 	"testing"
@@ -95,6 +96,10 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
 		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
 
+		stateStorage := mocks.NewScoreChangedStateStorageInterface(t)
+		stateStorage.On("Get", event.StudentId, event.LessonId).Once().Return("")
+		stateStorage.On("Set", event.StudentId, event.LessonId, mock.Anything).Once().Return()
+
 		messageIdStorage := mocks.NewScoreChangedMessageIdStorageInterface(t)
 		messageIdStorage.On("GetAll", event.StudentId, event.LessonId).Return(models.ScoreChangedMessageMap{})
 
@@ -106,6 +111,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			repository:                   userRepository,
 			scoreClient:                  scoreClient,
 			scoreChangedEventComposer:    scoreChangeEventComposer,
+			scoreChangedStateStorage:     stateStorage,
 			scoreChangedMessageIdStorage: messageIdStorage,
 			serviceContainer: &ServiceContainer{
 				ClientController: clientController,
@@ -189,6 +195,10 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
 		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
 
+		stateStorage := mocks.NewScoreChangedStateStorageInterface(t)
+		stateStorage.On("Get", event.StudentId, event.LessonId).Once().Return("123")
+		stateStorage.On("Set", event.StudentId, event.LessonId, mock.Anything).Once().Return()
+
 		messageIdStorage := mocks.NewScoreChangedMessageIdStorageInterface(t)
 		messageIdStorage.On("GetAll", event.StudentId, event.LessonId).
 			Return(models.ScoreChangedMessageMap{
@@ -201,6 +211,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			repository:                   userRepository,
 			scoreClient:                  scoreClient,
 			scoreChangedEventComposer:    scoreChangeEventComposer,
+			scoreChangedStateStorage:     stateStorage,
 			scoreChangedMessageIdStorage: messageIdStorage,
 			serviceContainer: &ServiceContainer{
 				ClientController: clientController,
@@ -287,6 +298,10 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
 		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
 
+		stateStorage := mocks.NewScoreChangedStateStorageInterface(t)
+		stateStorage.On("Get", event.StudentId, event.LessonId).Once().Return("123")
+		stateStorage.On("Set", event.StudentId, event.LessonId, mock.Anything).Once().Return()
+
 		messageIdStorage := mocks.NewScoreChangedMessageIdStorageInterface(t)
 		messageIdStorage.On("GetAll", event.StudentId, event.LessonId).
 			Return(models.ScoreChangedMessageMap{
@@ -302,6 +317,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			repository:                   userRepository,
 			scoreClient:                  scoreClient,
 			scoreChangedEventComposer:    scoreChangeEventComposer,
+			scoreChangedStateStorage:     stateStorage,
 			scoreChangedMessageIdStorage: messageIdStorage,
 			serviceContainer: &ServiceContainer{
 				ClientController: clientController,
@@ -393,6 +409,10 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
 		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
 
+		stateStorage := mocks.NewScoreChangedStateStorageInterface(t)
+		stateStorage.On("Get", event.StudentId, event.LessonId).Once().Return("123")
+		stateStorage.On("Set", event.StudentId, event.LessonId, mock.Anything).Once().Return()
+
 		messageIdStorage := mocks.NewScoreChangedMessageIdStorageInterface(t)
 		messageIdStorage.On("GetAll", event.StudentId, event.LessonId).Return(models.ScoreChangedMessageMap{})
 		messageIdStorage.On("Set", event.StudentId, event.LessonId, chatIds[0], expectedMessageIds[0]).Return()
@@ -411,6 +431,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			repository:                   userRepository,
 			scoreClient:                  scoreClient,
 			scoreChangedEventComposer:    scoreChangeEventComposer,
+			scoreChangedStateStorage:     stateStorage,
 			scoreChangedMessageIdStorage: messageIdStorage,
 			serviceContainer: &ServiceContainer{
 				ClientController: clientController,
@@ -493,6 +514,93 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		}
 		err := handler.Handle(&events.ScoreChangedEvent{})
 		assert.NoError(t, err)
+	})
+
+	t.Run("same_change_state_no_send_message", func(t *testing.T) {
+		event := events.ScoreChangedEvent{
+			ScoreEvent: events.ScoreEvent{
+				Id:           112233,
+				StudentId:    123,
+				LessonId:     150,
+				LessonPart:   1,
+				DisciplineId: 234,
+				Year:         2028,
+				Semester:     1,
+				ScoreValue: events.ScoreValue{
+					Value:     2.5,
+					IsAbsent:  false,
+					IsDeleted: false,
+				},
+				UpdatedAt: time.Date(2028, time.Month(11), 18, 14, 30, 40, 0, time.Local),
+				SyncedAt:  time.Date(2028, time.Month(11), 18, 14, 35, 13, 0, time.Local),
+			},
+			Previous: events.ScoreValue{
+				Value:     0,
+				IsAbsent:  false,
+				IsDeleted: true,
+			},
+		}
+
+		disciplineScore := scoreApi.DisciplineScore{
+			Discipline: scoreApi.Discipline{
+				Id:   int(event.DisciplineId),
+				Name: "Капітал!",
+			},
+			Score: scoreApi.Score{
+				Lesson: scoreApi.Lesson{
+					Id:   int(event.LessonId),
+					Date: time.Date(2023, time.Month(2), 12, 0, 0, 0, 0, time.Local),
+					Type: scoreApi.LessonType{
+						Id:        5,
+						ShortName: "МК",
+						LongName:  "Модульний контроль.",
+					},
+				},
+				FirstScore: floatPointer(2.5),
+			},
+		}
+
+		previousScore := &scoreApi.Score{
+			Lesson: disciplineScore.Score.Lesson,
+		}
+
+		userRepository := mocks.NewUserRepositoryInterface(t)
+		userRepository.On("GetClientUserIds", event.StudentId).Return([]string{"test-chat-id-1"})
+
+		scoreClient := score.NewMockClientInterface(t)
+		scoreClient.
+			On("GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId)).
+			Once().
+			Return(disciplineScore, nil)
+
+		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
+		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
+
+		previousState := CalculateState(&disciplineScore.Score, previousScore)
+
+		stateStorage := mocks.NewScoreChangedStateStorageInterface(t)
+		stateStorage.On("Get", event.StudentId, event.LessonId).Once().Return(previousState)
+
+		handler := ScoreChangedEventHandler{
+			out:                          &bytes.Buffer{},
+			repository:                   userRepository,
+			scoreClient:                  scoreClient,
+			scoreChangedEventComposer:    scoreChangeEventComposer,
+			scoreChangedStateStorage:     stateStorage,
+			scoreChangedMessageIdStorage: mocks.NewScoreChangedMessageIdStorageInterface(t),
+			serviceContainer:             &ServiceContainer{},
+		}
+
+		clientController := mocks.NewClientControllerInterface(t)
+		var err error
+
+		handler.serviceContainer.SetController(clientController)
+
+		err = handler.Handle(&event)
+		assert.NoError(t, err)
+		runtime.Gosched()
+		time.Sleep(time.Millisecond * 40)
+		clientController.AssertNotCalled(t, "ScoreChangedAction")
 	})
 
 	t.Run("success_created_scores_race_condition", func(t *testing.T) {
@@ -578,7 +686,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 						LongName:  "Модульний контроль.",
 					},
 				},
-				FirstScore: floatPointer(2.5),
+				SecondScore: floatPointer(3),
 			},
 		}
 
@@ -619,6 +727,10 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 				redis:         redisClient,
 				storageExpire: time.Minute * 5,
 			},
+			scoreChangedStateStorage: &ScoreChangedStateStorage{
+				redis:         redisClient,
+				storageExpire: time.Minute,
+			},
 			scoreChangedMessageIdStorage: &ScoreChangedMessageIdStorage{
 				out:           &bytes.Buffer{},
 				redis:         redisClient,
@@ -649,8 +761,8 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		clientController.AssertNumberOfCalls(t, "ScoreChangedAction", 1)
 
 		scoreClient.On("GetStudentScore", uint32(event2.StudentId), int(event2.DisciplineId), int(event2.LessonId)).
-			Maybe().
-			Return(disciplineScore1, nil)
+			Once().
+			Return(disciplineScore2, nil)
 
 		// process seconds message in queue
 		clientController.On("ScoreChangedAction", chatIds[0], createdMessageIds[0], &disciplineScore2, &previousScore).

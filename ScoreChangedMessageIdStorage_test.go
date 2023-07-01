@@ -25,7 +25,7 @@ func TestScoreChangedMessageIdStorage_Set(t *testing.T) {
 
 		chatId := "test-chat-id-1"
 		messageId := "test-message-id"
-		expectedKey := "SM:123:99"
+		expectedKey := "SM123:99"
 
 		redisMock.ExpectHSet(expectedKey, chatId, messageId).SetVal(1)
 		redisMock.ExpectExpire(expectedKey, time.Minute).SetVal(true)
@@ -47,7 +47,7 @@ func TestScoreChangedMessageIdStorage_Set(t *testing.T) {
 
 		chatId := "test-chat-id-1"
 		messageId := ""
-		expectedKey := "SM:123:99"
+		expectedKey := "SM123:99"
 
 		redisMock.ExpectHDel(expectedKey, chatId).SetVal(1)
 		redisMock.ExpectExpire(expectedKey, time.Minute).SetVal(true)
@@ -72,7 +72,7 @@ func TestScoreChangedMessageIdStorage_Set(t *testing.T) {
 
 		chatId := "test-chat-id-1"
 		messageId := "test-message-id"
-		expectedKey := "SM:123:99"
+		expectedKey := "SM123:99"
 
 		redisMock.ExpectHSet(expectedKey, chatId, messageId).SetErr(expectedError)
 
@@ -100,7 +100,7 @@ func TestScoreChangedMessageIdStorage_GetAll(t *testing.T) {
 
 		chatId2 := "test-chat-id-2"
 		messageId2 := "test-message-id-2"
-		expectedKey := "SM:123:99"
+		expectedKey := "SM123:99"
 
 		expectedResult := models.ScoreChangedMessageMap{
 			chatId1: messageId1,
@@ -128,7 +128,7 @@ func TestScoreChangedMessageIdStorage_GetAll(t *testing.T) {
 			storageExpire: time.Minute,
 		}
 
-		expectedKey := "SM:123:99"
+		expectedKey := "SM123:99"
 		redisMock.ExpectHGetAll(expectedKey).RedisNil()
 
 		actualResult := storage.GetAll(123, 99)
@@ -148,7 +148,7 @@ func TestScoreChangedMessageIdStorage_GetAll(t *testing.T) {
 			storageExpire: time.Minute,
 		}
 
-		expectedKey := "SM:123:99"
+		expectedKey := "SM123:99"
 		redisMock.ExpectHGetAll(expectedKey).SetErr(expectedError)
 
 		actualResult := storage.GetAll(123, 99)

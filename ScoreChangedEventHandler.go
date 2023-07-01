@@ -14,6 +14,7 @@ type ScoreChangedEventHandler struct {
 	repository                   UserRepositoryInterface
 	scoreClient                  score.ClientInterface
 	scoreChangedEventComposer    ScoreChangeEventComposerInterface
+	scoreChangedStateStorage     ScoreChangedStateStorageInterface
 	scoreChangedMessageIdStorage ScoreChangedMessageIdStorageInterface
 	multiMutex                   MultiMutex
 }
@@ -71,6 +72,12 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 	defer mutex.Unlock()
 
 	previousScore := handler.scoreChangedEventComposer.Compose(event, &disciplineScore.Score)
+
+	newState := CalculateState(&disciplineScore.Score, previousScore)
+	if handler.scoreChangedStateStorage.Get(event.StudentId, event.LessonId) == newState {
+		return
+	}
+
 	previousMessageIds := handler.scoreChangedMessageIdStorage.GetAll(event.StudentId, event.LessonId)
 	for _, chatId := range *chatIds {
 		err, newMessageId := handler.serviceContainer.ClientController.ScoreChangedAction(
@@ -85,4 +92,6 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 			handler.scoreChangedMessageIdStorage.Set(event.StudentId, event.LessonId, chatId, newMessageId)
 		}
 	}
+
+	handler.scoreChangedStateStorage.Set(event.StudentId, event.LessonId, newState)
 }

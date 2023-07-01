@@ -49,5 +49,5 @@ func (storage *ScoreChangedMessageIdStorage) GetAll(studentId uint, lessonId uin
 }
 
 func (storage *ScoreChangedMessageIdStorage) makeKey(studentId uint, lessonId uint) string {
-	return "SM:" + strconv.FormatUint(uint64(studentId), 10) + ":" + strconv.FormatUint(uint64(lessonId), 10)
+	return "SM" + strconv.FormatUint(uint64(studentId), 10) + ":" + strconv.FormatUint(uint64(lessonId), 10)
 }

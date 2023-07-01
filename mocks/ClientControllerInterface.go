@@ -38,23 +38,23 @@ func (_m *ClientControllerInterface) LogoutFinishedAction(event *events.UserAuth
 	return r0
 }
 
-// ScoreChangedAction provides a mock function with given fields: chatId, previousMessageId, event, previousScore
-func (_m *ClientControllerInterface) ScoreChangedAction(chatId string, previousMessageId string, event *scoreApi.DisciplineScore, previousScore *scoreApi.Score) (error, string) {
-	ret := _m.Called(chatId, previousMessageId, event, previousScore)
+// ScoreChangedAction provides a mock function with given fields: chatId, previousMessageId, disciplineScore, previousScore
+func (_m *ClientControllerInterface) ScoreChangedAction(chatId string, previousMessageId string, disciplineScore *scoreApi.DisciplineScore, previousScore *scoreApi.Score) (error, string) {
+	ret := _m.Called(chatId, previousMessageId, disciplineScore, previousScore)
 
 	var r0 error
 	var r1 string
 	if rf, ok := ret.Get(0).(func(string, string, *scoreApi.DisciplineScore, *scoreApi.Score) (error, string)); ok {
-		return rf(chatId, previousMessageId, event, previousScore)
+		return rf(chatId, previousMessageId, disciplineScore, previousScore)
 	}
 	if rf, ok := ret.Get(0).(func(string, string, *scoreApi.DisciplineScore, *scoreApi.Score) error); ok {
-		r0 = rf(chatId, previousMessageId, event, previousScore)
+		r0 = rf(chatId, previousMessageId, disciplineScore, previousScore)
 	} else {
 		r0 = ret.Error(0)
 	}
 
 	if rf, ok := ret.Get(1).(func(string, string, *scoreApi.DisciplineScore, *scoreApi.Score) string); ok {
-		r1 = rf(chatId, previousMessageId, event, previousScore)
+		r1 = rf(chatId, previousMessageId, disciplineScore, previousScore)
 	} else {
 		r1 = ret.Get(1).(string)
 	}

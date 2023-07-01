@@ -7,7 +7,7 @@ import (
 
 type ClientControllerInterface interface {
 	ExecutableInterface
-	ScoreChangedAction(chatId string, previousMessageId string, event *scoreApi.DisciplineScore, previousScore *scoreApi.Score) (err error, messageId string)
+	ScoreChangedAction(chatId string, previousMessageId string, disciplineScore *scoreApi.DisciplineScore, previousScore *scoreApi.Score) (err error, messageId string)
 	WelcomeAuthorizedAction(event *events.UserAuthorizedEvent) error
 	LogoutFinishedAction(event *events.UserAuthorizedEvent) error
 }

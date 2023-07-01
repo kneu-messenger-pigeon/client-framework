@@ -86,6 +86,11 @@ func TestNewServiceContainer(t *testing.T) {
 			assert.NotEmpty(t, scoreChangedEventComposer.redis)
 			assert.Equal(t, out, scoreChangedEventComposer.out)
 
+			assert.IsType(t, &ScoreChangedStateStorage{}, scoreChangedEventHandler.scoreChangedStateStorage)
+			scoreChangedStateStorage := scoreChangedEventHandler.scoreChangedMessageIdStorage.(*ScoreChangedMessageIdStorage)
+			assert.Equal(t, config.repeatScoreChangesTimeframe, scoreChangedStateStorage.storageExpire)
+			assert.NotEmpty(t, scoreChangedStateStorage.redis)
+
 			assert.IsType(t, &ScoreChangedMessageIdStorage{}, scoreChangedEventHandler.scoreChangedMessageIdStorage)
 			scoreChangedMessageIdStorage := scoreChangedEventHandler.scoreChangedMessageIdStorage.(*ScoreChangedMessageIdStorage)
 			assert.Equal(t, config.repeatScoreChangesTimeframe, scoreChangedMessageIdStorage.storageExpire)

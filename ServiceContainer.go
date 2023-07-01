@@ -107,6 +107,10 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 					redis:         redisClient,
 					storageExpire: config.repeatScoreChangesTimeframe,
 				},
+				scoreChangedStateStorage: &ScoreChangedStateStorage{
+					redis:         redisClient,
+					storageExpire: config.repeatScoreChangesTimeframe,
+				},
 				scoreChangedMessageIdStorage: &ScoreChangedMessageIdStorage{
 					out:           out,
 					redis:         redisClient,
