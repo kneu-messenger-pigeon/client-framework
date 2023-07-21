@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/kneu-messenger-pigeon/client-framework/mocks"
 	"github.com/kneu-messenger-pigeon/events"
+	eventsMocks "github.com/kneu-messenger-pigeon/events/mocks"
 	"github.com/segmentio/kafka-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -41,7 +42,7 @@ func TestKafkaConsumerProcessor_Execute(t *testing.T) {
 		handler.On("Handle", &event).Once().Return(nil)
 		handler.On("Commit").Return(nil)
 
-		reader := events.NewMockReaderInterface(t)
+		reader := eventsMocks.NewReaderInterface(t)
 
 		reader.On("FetchMessage", matchContext).Once().Return(message, nil)
 		reader.On("FetchMessage", matchContext).Once().Return(func(_ context.Context) kafka.Message {
@@ -87,7 +88,7 @@ func TestKafkaConsumerProcessor_Execute(t *testing.T) {
 		handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{})
 		handler.On("Commit").Return(expectedError)
 
-		reader := events.NewMockReaderInterface(t)
+		reader := eventsMocks.NewReaderInterface(t)
 
 		reader.On("FetchMessage", matchContext).Once().Return(func(_ context.Context) kafka.Message {
 			cancel()
@@ -115,7 +116,7 @@ func TestKafkaConsumerProcessor_Execute(t *testing.T) {
 		handler.On("GetExpectedMessageKey").Return("")
 		handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{})
 
-		reader := events.NewMockReaderInterface(t)
+		reader := eventsMocks.NewReaderInterface(t)
 
 		connector := KafkaConsumerProcessor{
 			out:     out,
@@ -145,7 +146,7 @@ func TestKafkaConsumerProcessor_Disable(t *testing.T) {
 	handler.On("GetExpectedMessageKey").Return("")
 	handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{})
 
-	reader := events.NewMockReaderInterface(t)
+	reader := eventsMocks.NewReaderInterface(t)
 
 	connector := KafkaConsumerProcessor{
 		out:     out,

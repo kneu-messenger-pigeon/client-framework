@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/kneu-messenger-pigeon/events"
+	"github.com/kneu-messenger-pigeon/events/mocks"
 	"github.com/segmentio/kafka-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -38,7 +39,7 @@ func TestUserLogoutHandler_Handle(t *testing.T) {
 		expectedMessage.Client = "test-client"
 		expectedMessage.ClientUserId = "test-client-id"
 
-		writer := events.NewMockWriterInterface(t)
+		writer := mocks.NewWriterInterface(t)
 		writer.On("WriteMessages", matchContext, messageMatcher(expectedMessage)).Return(nil)
 
 		handler := UserLogoutHandler{
@@ -58,7 +59,7 @@ func TestUserLogoutHandler_Handle(t *testing.T) {
 
 		expectedError := errors.New("test expected error")
 
-		writer := events.NewMockWriterInterface(t)
+		writer := mocks.NewWriterInterface(t)
 		writer.On("WriteMessages", matchContext, messageMatcher(expectedMessage)).Return(expectedError)
 
 		handler := UserLogoutHandler{

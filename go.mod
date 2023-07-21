@@ -6,7 +6,7 @@ require (
 	github.com/go-redis/redismock/v9 v9.0.3
 	github.com/joho/godotenv v1.5.1
 	github.com/kneu-messenger-pigeon/authorizer-client v0.1.2
-	github.com/kneu-messenger-pigeon/events v0.1.37
+	github.com/kneu-messenger-pigeon/events v0.1.40
 	github.com/kneu-messenger-pigeon/score-api v0.1.11
 	github.com/kneu-messenger-pigeon/score-client v0.1.11
 	github.com/redis/go-redis/v9 v9.0.3
