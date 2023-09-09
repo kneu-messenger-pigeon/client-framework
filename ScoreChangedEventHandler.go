@@ -11,6 +11,7 @@ import (
 type ScoreChangedEventHandler struct {
 	out                          io.Writer
 	serviceContainer             *ServiceContainer
+	debugLogger                  *DebugLogger
 	repository                   UserRepositoryInterface
 	scoreClient                  score.ClientInterface
 	scoreChangedEventComposer    ScoreChangeEventComposerInterface
@@ -44,14 +45,15 @@ func (handler *ScoreChangedEventHandler) Handle(s any) error {
 	}
 
 	chatIds := handler.repository.GetClientUserIds(event.StudentId)
+
+	handler.debugLogger.Log(
+		"ScoreChangedEventHandler: receive change lessonId %d, studentId %d, chatIds: %v",
+		event.LessonId, event.StudentId, chatIds,
+	)
 	if len(chatIds) == 0 {
 		return nil
 	}
 
-	/**
-	 * @todo
-	 * - implement storing send message chat id and restore it from storage
-	 */
 	disciplineScore, err := handler.scoreClient.GetStudentScore(
 		uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId),
 	)
@@ -75,6 +77,10 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 
 	newState := CalculateState(&disciplineScore.Score, previousScore)
 	if handler.scoreChangedStateStorage.Get(event.StudentId, event.LessonId) == newState {
+		handler.debugLogger.Log(
+			"ScoreChangedEventHandler: change (lessonId:%d, studentId %d) skip as not changed",
+			event.LessonId, event.StudentId,
+		)
 		return
 	}
 
@@ -82,6 +88,11 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 	for _, chatId := range *chatIds {
 		err, newMessageId := handler.serviceContainer.ClientController.ScoreChangedAction(
 			chatId, previousMessageIds[chatId], disciplineScore, previousScore,
+		)
+
+		handler.debugLogger.Log(
+			"ScoreChangedEventHandler: change (lessonId:%d, studentId %d) send update: message id %d",
+			event.LessonId, event.StudentId, newMessageId,
 		)
 
 		if err != nil {

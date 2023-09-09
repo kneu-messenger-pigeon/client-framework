@@ -13,6 +13,7 @@ import (
 const ScoreChangedEventProcessorCount = 6
 
 type ServiceContainer struct {
+	DebugLogger                    *DebugLogger
 	UserRepository                 *UserRepository
 	UserLogoutHandler              *UserLogoutHandler
 	AuthorizerClient               *authorizer.Client
@@ -21,7 +22,6 @@ type ServiceContainer struct {
 	ScoreChangedEventProcessorPool [ScoreChangedEventProcessorCount]KafkaConsumerProcessorInterface
 	Executor                       *Executor
 	ClientController               ClientControllerInterface
-	DebugLogger                    *DebugLogger
 }
 
 func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
@@ -33,6 +33,11 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 	}
 
 	container := &ServiceContainer{}
+
+	container.DebugLogger = &DebugLogger{
+		out:     out,
+		enabled: config.debug,
+	}
 
 	container.UserRepository = &UserRepository{
 		out:   out,
@@ -101,6 +106,7 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 			handler: &ScoreChangedEventHandler{
 				out:              out,
 				serviceContainer: container,
+				debugLogger:      container.DebugLogger,
 				repository:       container.UserRepository,
 				scoreClient:      container.ScoreClient,
 				scoreChangedEventComposer: &ScoreChangeEventComposer{
@@ -124,11 +130,6 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 	container.Executor = &Executor{
 		out:              out,
 		serviceContainer: container,
-	}
-
-	container.DebugLogger = &DebugLogger{
-		out:     out,
-		enabled: config.debug,
 	}
 
 	return container

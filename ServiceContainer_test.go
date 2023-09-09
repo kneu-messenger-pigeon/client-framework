@@ -31,6 +31,11 @@ func TestNewServiceContainer(t *testing.T) {
 
 		serviceContainer := NewServiceContainer(config, out)
 
+		assert.NotNil(t, serviceContainer.DebugLogger)
+		assert.IsType(t, &DebugLogger{}, serviceContainer.DebugLogger)
+		assert.Equal(t, out, serviceContainer.DebugLogger.out)
+		assert.Equal(t, config.debug, serviceContainer.DebugLogger.enabled)
+
 		assert.NotEmpty(t, serviceContainer.UserRepository)
 		assert.NotEmpty(t, serviceContainer.UserRepository.redis)
 		assert.Equal(t, out, serviceContainer.UserRepository.out)
@@ -76,6 +81,7 @@ func TestNewServiceContainer(t *testing.T) {
 
 			assert.IsType(t, &ScoreChangedEventHandler{}, scoreChangedEventProcessor.handler)
 			scoreChangedEventHandler := scoreChangedEventProcessor.handler.(*ScoreChangedEventHandler)
+			assert.Equal(t, serviceContainer.DebugLogger, scoreChangedEventHandler.debugLogger)
 			assert.Equal(t, serviceContainer.UserRepository, scoreChangedEventHandler.repository)
 			assert.Equal(t, out, scoreChangedEventHandler.out)
 			assert.Equal(t, serviceContainer, scoreChangedEventHandler.serviceContainer)
@@ -104,11 +110,6 @@ func TestNewServiceContainer(t *testing.T) {
 		assert.Equal(t, out, serviceContainer.Executor.out)
 
 		assert.Nil(t, serviceContainer.ClientController)
-
-		assert.NotNil(t, serviceContainer.DebugLogger)
-		assert.IsType(t, &DebugLogger{}, serviceContainer.DebugLogger)
-		assert.Equal(t, out, serviceContainer.DebugLogger.out)
-		assert.Equal(t, config.debug, serviceContainer.DebugLogger.enabled)
 	})
 }
 

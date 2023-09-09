@@ -108,6 +108,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 
 		handler := ScoreChangedEventHandler{
 			out:                          &bytes.Buffer{},
+			debugLogger:                  &DebugLogger{},
 			repository:                   userRepository,
 			scoreClient:                  scoreClient,
 			scoreChangedEventComposer:    scoreChangeEventComposer,
@@ -208,6 +209,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 
 		handler := ScoreChangedEventHandler{
 			out:                          &bytes.Buffer{},
+			debugLogger:                  &DebugLogger{},
 			repository:                   userRepository,
 			scoreClient:                  scoreClient,
 			scoreChangedEventComposer:    scoreChangeEventComposer,
@@ -314,6 +316,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 
 		handler := ScoreChangedEventHandler{
 			out:                          &bytes.Buffer{},
+			debugLogger:                  &DebugLogger{},
 			repository:                   userRepository,
 			scoreClient:                  scoreClient,
 			scoreChangedEventComposer:    scoreChangeEventComposer,
@@ -428,6 +431,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 
 		handler := ScoreChangedEventHandler{
 			out:                          out,
+			debugLogger:                  &DebugLogger{},
 			repository:                   userRepository,
 			scoreClient:                  scoreClient,
 			scoreChangedEventComposer:    scoreChangeEventComposer,
@@ -473,6 +477,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 
 		handler := ScoreChangedEventHandler{
 			out:         &bytes.Buffer{},
+			debugLogger: &DebugLogger{},
 			repository:  userRepository,
 			scoreClient: scoreClient,
 			serviceContainer: &ServiceContainer{
@@ -497,8 +502,9 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		userRepository.On("GetClientUserIds", event.StudentId).Return([]string{})
 
 		handler := ScoreChangedEventHandler{
-			out:        &bytes.Buffer{},
-			repository: userRepository,
+			out:         &bytes.Buffer{},
+			debugLogger: &DebugLogger{},
+			repository:  userRepository,
 			serviceContainer: &ServiceContainer{
 				ClientController: clientController,
 			},
@@ -510,6 +516,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 	t.Run("success_no_service_container", func(t *testing.T) {
 		handler := ScoreChangedEventHandler{
 			out:              &bytes.Buffer{},
+			debugLogger:      &DebugLogger{},
 			serviceContainer: &ServiceContainer{},
 		}
 		err := handler.Handle(&events.ScoreChangedEvent{})
@@ -583,6 +590,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 
 		handler := ScoreChangedEventHandler{
 			out:                          &bytes.Buffer{},
+			debugLogger:                  &DebugLogger{},
 			repository:                   userRepository,
 			scoreClient:                  scoreClient,
 			scoreChangedEventComposer:    scoreChangeEventComposer,
@@ -720,6 +728,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 
 		handler := ScoreChangedEventHandler{
 			out:         &bytes.Buffer{},
+			debugLogger: &DebugLogger{},
 			repository:  userRepository,
 			scoreClient: scoreClient,
 			scoreChangedEventComposer: &ScoreChangeEventComposer{
