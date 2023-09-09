@@ -91,8 +91,8 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 		)
 
 		handler.debugLogger.Log(
-			"ScoreChangedEventHandler: change (lessonId:%d, studentId %d) send update: message id %d",
-			event.LessonId, event.StudentId, newMessageId,
+			"ScoreChangedEventHandler: change (lessonId:%d, studentId %d) send update: message id %s, err: %v",
+			event.LessonId, event.StudentId, newMessageId, err,
 		)
 
 		if err != nil {
