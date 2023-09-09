@@ -21,6 +21,7 @@ type ServiceContainer struct {
 	ScoreChangedEventProcessorPool [ScoreChangedEventProcessorCount]KafkaConsumerProcessorInterface
 	Executor                       *Executor
 	ClientController               ClientControllerInterface
+	DebugLogger                    *DebugLogger
 }
 
 func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
@@ -123,6 +124,11 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 	container.Executor = &Executor{
 		out:              out,
 		serviceContainer: container,
+	}
+
+	container.DebugLogger = &DebugLogger{
+		out:     out,
+		enabled: config.debug,
 	}
 
 	return container

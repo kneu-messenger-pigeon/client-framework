@@ -104,6 +104,11 @@ func TestNewServiceContainer(t *testing.T) {
 		assert.Equal(t, out, serviceContainer.Executor.out)
 
 		assert.Nil(t, serviceContainer.ClientController)
+
+		assert.NotNil(t, serviceContainer.DebugLogger)
+		assert.IsType(t, &DebugLogger{}, serviceContainer.DebugLogger)
+		assert.Equal(t, out, serviceContainer.DebugLogger.out)
+		assert.Equal(t, config.debug, serviceContainer.DebugLogger.enabled)
 	})
 }
 

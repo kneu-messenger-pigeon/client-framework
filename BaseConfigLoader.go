@@ -21,6 +21,7 @@ type BaseConfig struct {
 	redisOptions                *redis.Options
 	repeatScoreChangesTimeframe time.Duration
 	commitThreshold             int
+	debug                       bool
 }
 
 func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
@@ -61,6 +62,7 @@ func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
 		authorizerHost:              os.Getenv("AUTHORIZER_HOST"),
 		repeatScoreChangesTimeframe: time.Second * time.Duration(repeatScoreChangesTimeframeSeconds),
 		commitThreshold:             commitThreshold,
+		debug:                       os.Getenv("DEBUG") == "true",
 	}
 
 	if config.appSecret == "" {
