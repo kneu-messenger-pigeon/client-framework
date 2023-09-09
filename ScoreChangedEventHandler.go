@@ -102,6 +102,10 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 		}
 
 		if newMessageId != previousMessageIds[chatId] && (newMessageId != "" || err == nil) {
+			handler.debugLogger.Log(
+				"ScoreChangedEventHandler: change (lessonId:%d, studentId %d) save message id `%s` (err: %v)",
+				event.LessonId, event.StudentId, newMessageId, err,
+			)
 			handler.scoreChangedMessageIdStorage.Set(event.StudentId, event.LessonId, chatId, newMessageId)
 		}
 	}
