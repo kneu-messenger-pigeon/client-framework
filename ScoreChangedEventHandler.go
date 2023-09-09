@@ -78,7 +78,7 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 	previousScore := handler.scoreChangedEventComposer.Compose(event, &disciplineScore.Score)
 
 	handler.debugLogger.Log(
-		"ScoreChangedEventHandler: change (lessonId:%d, studentId %d) new score %f and %f, previous score: %f and %f",
+		"ScoreChangedEventHandler: change (lessonId:%d, studentId %d) new score %.1f and %.1f, previous score: %.1f and %.1f",
 		event.LessonId, event.StudentId,
 		unpackFloatRef(disciplineScore.Score.FirstScore), unpackFloatRef(disciplineScore.Score.SecondScore),
 		unpackFloatRef(previousScore.FirstScore), unpackFloatRef(previousScore.SecondScore),
