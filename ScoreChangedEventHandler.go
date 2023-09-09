@@ -69,7 +69,8 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 	event *events.ScoreChangedEvent, chatIds *[]string,
 	disciplineScore *scoreApi.DisciplineScore,
 ) {
-	mutex := handler.multiMutex.Get(event.Id)
+	// each score could be identified by lessonId and studentId
+	mutex := handler.multiMutex.Get(event.LessonId & event.StudentId)
 	mutex.Lock()
 	defer mutex.Unlock()
 	handler.debugLogger.Log("Get lock to process event: %v", event)
