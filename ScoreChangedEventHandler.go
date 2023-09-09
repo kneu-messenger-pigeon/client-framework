@@ -77,6 +77,13 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 
 	previousScore := handler.scoreChangedEventComposer.Compose(event, &disciplineScore.Score)
 
+	handler.debugLogger.Log(
+		"ScoreChangedEventHandler: change (lessonId:%d, studentId %d) new score %f and %f, previous score: %f and %f",
+		event.LessonId, event.StudentId,
+		disciplineScore.Score.FirstScore, disciplineScore.Score.SecondScore,
+		previousScore.FirstScore, previousScore.SecondScore,
+	)
+
 	newState := CalculateState(&disciplineScore.Score, previousScore)
 	if handler.scoreChangedStateStorage.Get(event.StudentId, event.LessonId) == newState {
 		handler.debugLogger.Log(
