@@ -72,6 +72,7 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 	mutex := handler.multiMutex.Get(event.Id)
 	mutex.Lock()
 	defer mutex.Unlock()
+	handler.debugLogger.Log("Get lock to process event: %v", event)
 
 	previousScore := handler.scoreChangedEventComposer.Compose(event, &disciplineScore.Score)
 
