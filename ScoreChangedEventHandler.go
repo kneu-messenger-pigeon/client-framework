@@ -80,8 +80,8 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 	handler.debugLogger.Log(
 		"ScoreChangedEventHandler: change (lessonId:%d, studentId %d) new score %f and %f, previous score: %f and %f",
 		event.LessonId, event.StudentId,
-		disciplineScore.Score.FirstScore, disciplineScore.Score.SecondScore,
-		previousScore.FirstScore, previousScore.SecondScore,
+		unpackFloatRef(disciplineScore.Score.FirstScore), unpackFloatRef(disciplineScore.Score.SecondScore),
+		unpackFloatRef(previousScore.FirstScore), unpackFloatRef(previousScore.SecondScore),
 	)
 
 	newState := CalculateState(&disciplineScore.Score, previousScore)
@@ -118,4 +118,11 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 	}
 
 	handler.scoreChangedStateStorage.Set(event.StudentId, event.LessonId, newState)
+}
+
+func unpackFloatRef(input *float32) float32 {
+	if input == nil {
+		return 0
+	}
+	return *input
 }
