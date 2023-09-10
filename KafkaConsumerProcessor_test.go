@@ -114,7 +114,7 @@ func TestKafkaConsumerProcessor_Execute(t *testing.T) {
 
 		handler := mocks.NewEventHandlerInterface(t)
 		handler.On("GetExpectedMessageKey").Return("")
-		handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{})
+		handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{}).Maybe()
 
 		reader := eventsMocks.NewReaderInterface(t)
 
@@ -143,8 +143,8 @@ func TestKafkaConsumerProcessor_Disable(t *testing.T) {
 	out := &bytes.Buffer{}
 
 	handler := mocks.NewEventHandlerInterface(t)
-	handler.On("GetExpectedMessageKey").Return("")
-	handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{})
+	handler.On("GetExpectedMessageKey").Return("UserAuthorizedEvent")
+	handler.On("GetExpectedEventType").Return(&events.UserAuthorizedEvent{}).Maybe()
 
 	reader := eventsMocks.NewReaderInterface(t)
 

@@ -29,13 +29,12 @@ func (processor *KafkaConsumerProcessor) Execute(ctx context.Context, wg *sync.W
 	var fetchContextCancel func()
 
 	expectedMessageKey := processor.handler.GetExpectedMessageKey()
-	event := processor.handler.GetExpectedEventType()
 
 	if processor.commitThreshold == 0 {
 		processor.commitThreshold = defaultCommitThreshold
 	}
 
-	if expectedMessageKey == "" || event == nil || processor.disabled {
+	if expectedMessageKey == "" || processor.handler.GetExpectedEventType() == nil || processor.disabled {
 		wg.Done()
 		return
 	}
@@ -45,6 +44,7 @@ func (processor *KafkaConsumerProcessor) Execute(ctx context.Context, wg *sync.W
 	for ctx.Err() == nil {
 		message, err = processor.reader.FetchMessage(fetchContext)
 		if err == nil && events.GetEventName(message.Key) == expectedMessageKey {
+			event := processor.handler.GetExpectedEventType()
 			err = json.Unmarshal(message.Value, &event)
 			if err == nil {
 				err = processor.handler.Handle(event)
