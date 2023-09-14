@@ -451,12 +451,18 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			serviceContainer: &ServiceContainer{
 				ClientController: clientController,
 			},
+			waitingForAnotherScoreTime: time.Millisecond * 500,
 		}
 
+		timeToCall := time.After(time.Millisecond * 550)
 		err := handler.Handle(&event)
-		// wait for async coroutine call
-		time.Sleep(time.Millisecond * 40)
 		assert.NoError(t, err)
+		// wait for async coroutine call
+		time.Sleep(time.Millisecond * 200)
+		runtime.Gosched()
+		clientController.AssertNotCalled(t, chatIds[0], "", &disciplineScore, previousScore)
+		<-timeToCall
+		runtime.Gosched()
 
 		assert.Contains(t, out.String(), expectedError.Error())
 		assert.Equal(t, 2, strings.Count(out.String(), expectedError.Error()))
