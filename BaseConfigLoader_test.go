@@ -26,6 +26,7 @@ var expectedBaseConfig = BaseConfig{
 		Network: "tcp",
 		Addr:    "REDIS:6379",
 	},
+	waitingForAnotherScoreTime: time.Second * 5,
 }
 
 func TestLoadBaseConfigFromEnvVars(t *testing.T) {
@@ -40,6 +41,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("AUTHORIZER_HOST", expectedBaseConfig.authorizerHost)
 		_ = os.Setenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES", strconv.Itoa(int(expectedBaseConfig.repeatScoreChangesTimeframe.Seconds())))
 		_ = os.Setenv("COMMIT_THRESHOLD", strconv.Itoa(expectedBaseConfig.commitThreshold))
+		_ = os.Setenv("WAITING_FOR_ANOTHER_SCOPE_TIME", expectedBaseConfig.waitingForAnotherScoreTime.String())
 
 		baseConfig, err := LoadBaseConfig("", testClientName)
 
@@ -61,6 +63,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Unsetenv("AUTHORIZER_HOST")
 		_ = os.Unsetenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES")
 		_ = os.Unsetenv("COMMIT_THRESHOLD")
+		_ = os.Unsetenv("WAITING_FOR_ANOTHER_SCOPE_TIME")
 
 		envFileContent += fmt.Sprintf("APP_SECRET=%s\n", expectedBaseConfig.appSecret)
 		envFileContent += fmt.Sprintf("KAFKA_HOST=%s\n", expectedBaseConfig.kafkaHost)
@@ -69,6 +72,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		envFileContent += fmt.Sprintf("AUTHORIZER_HOST=%s\n", expectedBaseConfig.authorizerHost)
 		envFileContent += fmt.Sprintf("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES=%d\n", int(expectedBaseConfig.repeatScoreChangesTimeframe.Seconds()))
 		envFileContent += fmt.Sprintf("COMMIT_THRESHOLD=%d\n", expectedBaseConfig.commitThreshold)
+		envFileContent += fmt.Sprintf("WAITING_FOR_ANOTHER_SCOPE_TIME=%s\n", expectedBaseConfig.waitingForAnotherScoreTime.String())
 
 		testEnvFilename := "TestLoadBaseConfigFromFile.env"
 		err := os.WriteFile(testEnvFilename, []byte(envFileContent), 0644)
@@ -95,6 +99,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("AUTHORIZER_HOST", "")
 		_ = os.Setenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES", "")
 		_ = os.Setenv("COMMIT_THRESHOLD", "")
+		_ = os.Setenv("WAITING_FOR_ANOTHER_SCOPE_TIME", "")
 
 		baseConfig, err := LoadBaseConfig("", testClientName)
 
@@ -150,6 +155,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("AUTHORIZER_HOST", "")
 		_ = os.Setenv("TIMEFRAME_TO_COMBINE_REPEAT_SCORE_CHANGES", "")
 		_ = os.Setenv("COMMIT_THRESHOLD", "")
+		_ = os.Setenv("WAITING_FOR_ANOTHER_SCOPE_TIME", "")
 
 		config, err := LoadBaseConfig("", testClientName)
 
@@ -192,6 +198,7 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		_ = os.Setenv("AUTHORIZER_HOST", "")
 		_ = os.Setenv("TELEGRAM_TOKEN", "")
 		_ = os.Setenv("COMMIT_THRESHOLD", "")
+		_ = os.Setenv("WAITING_FOR_ANOTHER_SCOPE_TIME", "")
 
 		config, err := LoadBaseConfig("", testClientName)
 

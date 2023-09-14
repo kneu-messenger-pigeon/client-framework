@@ -23,7 +23,7 @@ type ScoreChangeEventComposer struct {
 	storageExpire time.Duration
 }
 
-func (composer *ScoreChangeEventComposer) Compose(event *events.ScoreChangedEvent, currentScore *scoreApi.Score) *scoreApi.Score {
+func (composer *ScoreChangeEventComposer) SavePreviousScore(event *events.ScoreChangedEvent) {
 	ctx := context.Background()
 	storageScoreKey := composer.getStorageKey(event)
 
@@ -35,7 +35,7 @@ func (composer *ScoreChangeEventComposer) Compose(event *events.ScoreChangedEven
 		changedScoreFieldName = ScoreSecondFieldName
 	} else {
 		_, _ = fmt.Fprintf(composer.out, "Wrong lesson part, storedKey %s, event:  %v", storageScoreKey, event)
-		return &scoreApi.Score{}
+		return
 	}
 
 	var scoreValueToSet string
@@ -58,7 +58,15 @@ func (composer *ScoreChangeEventComposer) Compose(event *events.ScoreChangedEven
 			redisErr.Error(), storageScoreKey,
 		)
 	}
-	/** End section: Write new previous value to storage if there is no other value */
+}
+
+func (composer *ScoreChangeEventComposer) BothPreviousScoresSaved(event *events.ScoreChangedEvent) bool {
+	return composer.redis.HLen(context.Background(), composer.getStorageKey(event)).Val() == 2
+}
+
+func (composer *ScoreChangeEventComposer) Compose(event *events.ScoreChangedEvent, currentScore *scoreApi.Score) *scoreApi.Score {
+	ctx := context.Background()
+	storageScoreKey := composer.getStorageKey(event)
 
 	/** Read value from storage */
 	previousScore := scoreApi.Score{

@@ -6,5 +6,7 @@ import (
 )
 
 type ScoreChangeEventComposerInterface interface {
+	SavePreviousScore(event *events.ScoreChangedEvent)
+	BothPreviousScoresSaved(event *events.ScoreChangedEvent) bool
 	Compose(event *events.ScoreChangedEvent, currentScore *scoreApi.Score) (previousScore *scoreApi.Score)
 }

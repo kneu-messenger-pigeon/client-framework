@@ -104,11 +104,12 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 			commitThreshold: config.commitThreshold,
 			reader:          kafka.NewReader(scoreChangesReaderConfig),
 			handler: &ScoreChangedEventHandler{
-				out:              out,
-				serviceContainer: container,
-				debugLogger:      container.DebugLogger,
-				repository:       container.UserRepository,
-				scoreClient:      container.ScoreClient,
+				out:                        out,
+				serviceContainer:           container,
+				debugLogger:                container.DebugLogger,
+				repository:                 container.UserRepository,
+				scoreClient:                container.ScoreClient,
+				waitingForAnotherScoreTime: config.waitingForAnotherScoreTime,
 				scoreChangedEventComposer: &ScoreChangeEventComposer{
 					out:           out,
 					redis:         redisClient,

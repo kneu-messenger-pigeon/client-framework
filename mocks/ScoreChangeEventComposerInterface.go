@@ -15,6 +15,20 @@ type ScoreChangeEventComposerInterface struct {
 	mock.Mock
 }
 
+// BothPreviousScoresSaved provides a mock function with given fields: event
+func (_m *ScoreChangeEventComposerInterface) BothPreviousScoresSaved(event *events.ScoreChangedEvent) bool {
+	ret := _m.Called(event)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(*events.ScoreChangedEvent) bool); ok {
+		r0 = rf(event)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
 // Compose provides a mock function with given fields: event, currentScore
 func (_m *ScoreChangeEventComposerInterface) Compose(event *events.ScoreChangedEvent, currentScore *scoreApi.Score) *scoreApi.Score {
 	ret := _m.Called(event, currentScore)
@@ -29,6 +43,11 @@ func (_m *ScoreChangeEventComposerInterface) Compose(event *events.ScoreChangedE
 	}
 
 	return r0
+}
+
+// SavePreviousScore provides a mock function with given fields: event
+func (_m *ScoreChangeEventComposerInterface) SavePreviousScore(event *events.ScoreChangedEvent) {
+	_m.Called(event)
 }
 
 type mockConstructorTestingTNewScoreChangeEventComposerInterface interface {

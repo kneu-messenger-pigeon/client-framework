@@ -94,6 +94,8 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			Return(disciplineScore, nil)
 
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
+		scoreChangeEventComposer.On("SavePreviousScore", &event).Return()
+		scoreChangeEventComposer.On("BothPreviousScoresSaved", &event).Return(false)
 		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
 
 		stateStorage := mocks.NewScoreChangedStateStorageInterface(t)
@@ -117,6 +119,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			serviceContainer: &ServiceContainer{
 				ClientController: clientController,
 			},
+			waitingForAnotherScoreTime: time.Millisecond * 100,
 		}
 
 		clientController.On("ScoreChangedAction", chatIds[0], "", &disciplineScore, previousScore).
@@ -127,6 +130,8 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		err := handler.Handle(&event)
 		// wait for async coroutine call
 		time.Sleep(time.Millisecond * 40)
+		clientController.AssertNotCalled(t, "ScoreChangedAction", chatIds[0], "", &disciplineScore, previousScore)
+		time.Sleep(handler.waitingForAnotherScoreTime)
 		assert.NoError(t, err)
 	})
 
@@ -194,6 +199,8 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		scoreClient.On("GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId)).Return(disciplineScore, nil)
 
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
+		scoreChangeEventComposer.On("SavePreviousScore", &event).Return()
+		scoreChangeEventComposer.On("BothPreviousScoresSaved", &event).Return(false)
 		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
 
 		stateStorage := mocks.NewScoreChangedStateStorageInterface(t)
@@ -298,6 +305,8 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		scoreClient.On("GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId)).Return(disciplineScore, nil)
 
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
+		scoreChangeEventComposer.On("SavePreviousScore", &event).Return()
+		scoreChangeEventComposer.On("BothPreviousScoresSaved", &event).Return(false)
 		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
 
 		stateStorage := mocks.NewScoreChangedStateStorageInterface(t)
@@ -410,6 +419,8 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		).Return(disciplineScore, nil)
 
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
+		scoreChangeEventComposer.On("SavePreviousScore", &event).Return()
+		scoreChangeEventComposer.On("BothPreviousScoresSaved", &event).Return(false)
 		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
 
 		stateStorage := mocks.NewScoreChangedStateStorageInterface(t)
@@ -475,18 +486,27 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			"GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId),
 		).Return(scoreApi.DisciplineScore{}, expectedError)
 
+		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
+		scoreChangeEventComposer.On("SavePreviousScore", event).Return()
+		scoreChangeEventComposer.On("BothPreviousScoresSaved", event).Return(false)
+
+		out := &bytes.Buffer{}
+
 		handler := ScoreChangedEventHandler{
-			out:         &bytes.Buffer{},
-			debugLogger: &DebugLogger{},
-			repository:  userRepository,
-			scoreClient: scoreClient,
+			out:                       out,
+			debugLogger:               &DebugLogger{},
+			repository:                userRepository,
+			scoreClient:               scoreClient,
+			scoreChangedEventComposer: scoreChangeEventComposer,
 			serviceContainer: &ServiceContainer{
 				ClientController: clientController,
 			},
 		}
 		actualErr := handler.Handle(event)
-		assert.Error(t, actualErr)
-		assert.Equal(t, expectedError, actualErr)
+		assert.NoError(t, actualErr)
+		runtime.Gosched()
+		time.Sleep(time.Millisecond * 40)
+		assert.Contains(t, out.String(), "GetStudentScore return error: "+expectedError.Error())
 	})
 
 	t.Run("success_no_chat_ids", func(t *testing.T) {
@@ -581,6 +601,8 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			Return(disciplineScore, nil)
 
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
+		scoreChangeEventComposer.On("SavePreviousScore", &event).Return()
+		scoreChangeEventComposer.On("BothPreviousScoresSaved", &event).Return(false)
 		scoreChangeEventComposer.On("Compose", &event, &disciplineScore.Score).Return(previousScore)
 
 		previousState := CalculateState(&disciplineScore.Score, previousScore)

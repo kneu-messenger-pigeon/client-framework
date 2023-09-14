@@ -22,6 +22,7 @@ type BaseConfig struct {
 	repeatScoreChangesTimeframe time.Duration
 	commitThreshold             int
 	debug                       bool
+	waitingForAnotherScoreTime  time.Duration
 }
 
 func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
@@ -52,6 +53,11 @@ func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
 		repeatScoreChangesTimeframeSeconds = 600
 	}
 
+	waitingForAnotherScoreTime, err := time.ParseDuration(os.Getenv("WAITING_FOR_ANOTHER_SCOPE_TIME"))
+	if waitingForAnotherScoreTime == 0 || err != nil {
+		waitingForAnotherScoreTime = time.Second
+	}
+
 	config := BaseConfig{
 		clientName:                  clientName,
 		appSecret:                   os.Getenv("APP_SECRET"),
@@ -63,6 +69,7 @@ func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
 		repeatScoreChangesTimeframe: time.Second * time.Duration(repeatScoreChangesTimeframeSeconds),
 		commitThreshold:             commitThreshold,
 		debug:                       os.Getenv("DEBUG") == "true",
+		waitingForAnotherScoreTime:  waitingForAnotherScoreTime,
 	}
 
 	if config.appSecret == "" {

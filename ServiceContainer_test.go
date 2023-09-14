@@ -27,6 +27,7 @@ func TestNewServiceContainer(t *testing.T) {
 				Addr:       "localhost:6379",
 				ClientName: "test",
 			},
+			waitingForAnotherScoreTime: time.Second * 3,
 		}
 
 		serviceContainer := NewServiceContainer(config, out)
@@ -85,6 +86,7 @@ func TestNewServiceContainer(t *testing.T) {
 			assert.Equal(t, serviceContainer.UserRepository, scoreChangedEventHandler.repository)
 			assert.Equal(t, out, scoreChangedEventHandler.out)
 			assert.Equal(t, serviceContainer, scoreChangedEventHandler.serviceContainer)
+			assert.Equal(t, config.waitingForAnotherScoreTime, scoreChangedEventHandler.waitingForAnotherScoreTime)
 
 			assert.IsType(t, &ScoreChangeEventComposer{}, scoreChangedEventHandler.scoreChangedEventComposer)
 			scoreChangedEventComposer := scoreChangedEventHandler.scoreChangedEventComposer.(*ScoreChangeEventComposer)

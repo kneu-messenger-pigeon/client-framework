@@ -6,6 +6,7 @@ import (
 	scoreApi "github.com/kneu-messenger-pigeon/score-api"
 	"github.com/kneu-messenger-pigeon/score-client"
 	"io"
+	"time"
 )
 
 type ScoreChangedEventHandler struct {
@@ -18,6 +19,7 @@ type ScoreChangedEventHandler struct {
 	scoreChangedStateStorage     ScoreChangedStateStorageInterface
 	scoreChangedMessageIdStorage ScoreChangedMessageIdStorageInterface
 	multiMutex                   MultiMutex
+	waitingForAnotherScoreTime   time.Duration
 }
 
 type ScoreChangedEventPayload struct {
@@ -54,26 +56,32 @@ func (handler *ScoreChangedEventHandler) Handle(s any) error {
 		return nil
 	}
 
-	disciplineScore, err := handler.scoreClient.GetStudentScore(
-		uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId),
-	)
-	if err != nil {
-		return err
-	}
+	handler.scoreChangedEventComposer.SavePreviousScore(event)
 
-	go handler.callControllerAction(event, &chatIds, &disciplineScore)
+	go handler.callControllerAction(event, &chatIds)
 	return nil
 }
 
 func (handler *ScoreChangedEventHandler) callControllerAction(
 	event *events.ScoreChangedEvent, chatIds *[]string,
-	disciplineScore *scoreApi.DisciplineScore,
 ) {
+	if !handler.scoreChangedEventComposer.BothPreviousScoresSaved(event) {
+		time.Sleep(handler.waitingForAnotherScoreTime)
+	}
+
 	// each score could be identified by lessonId and studentId
 	mutex := handler.multiMutex.Get((event.LessonId & event.StudentId) * (event.LessonId | event.StudentId))
 	mutex.Lock()
 	defer mutex.Unlock()
 	handler.debugLogger.Log("Get lock to process event: %v", event)
+
+	disciplineScore, err := handler.scoreClient.GetStudentScore(
+		uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId),
+	)
+	if err != nil {
+		_, _ = fmt.Fprintf(handler.out, "GetStudentScore return error: %v\n", err)
+		return
+	}
 
 	previousScore := handler.scoreChangedEventComposer.Compose(event, &disciplineScore.Score)
 
@@ -96,7 +104,7 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 	previousMessageIds := handler.scoreChangedMessageIdStorage.GetAll(event.StudentId, event.LessonId)
 	for _, chatId := range *chatIds {
 		err, newMessageId := handler.serviceContainer.ClientController.ScoreChangedAction(
-			chatId, previousMessageIds[chatId], disciplineScore, previousScore,
+			chatId, previousMessageIds[chatId], &disciplineScore, previousScore,
 		)
 
 		handler.debugLogger.Log(
