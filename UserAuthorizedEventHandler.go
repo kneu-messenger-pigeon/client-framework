@@ -42,7 +42,7 @@ func (handler *UserAuthorizedEventHandler) Handle(s any) (err error) {
 			go handler.callControllerAction(event)
 		}
 
-		if hasChanges {
+		if err == nil && hasChanges {
 			if event.StudentId != 0 {
 				userCount.Inc()
 				loginCount.Inc()
