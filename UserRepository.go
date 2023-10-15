@@ -23,11 +23,12 @@ const ClientUserPrefix = "cu"
 
 const UserScanBatchSize = 500
 
-func (repository *UserRepository) SaveUser(clientUserId string, student *models.Student) (err error) {
+func (repository *UserRepository) SaveUser(clientUserId string, student *models.Student) (err error, hasChanges bool) {
 	previousStudent := repository.GetStudent(clientUserId)
 
 	studentSerialized, err := proto.Marshal(student)
 	ctx := context.Background()
+
 	if err == nil {
 		clientUserKey := repository.getClientUserKey(clientUserId)
 		pipe := repository.redis.TxPipeline()
@@ -48,7 +49,7 @@ func (repository *UserRepository) SaveUser(clientUserId string, student *models.
 		_, err = pipe.Exec(ctx)
 	}
 
-	return err
+	return err, previousStudent.Id != student.Id
 }
 
 func (repository *UserRepository) Commit() error {

@@ -29,7 +29,8 @@ func (handler *UserAuthorizedEventHandler) Commit() error {
 func (handler *UserAuthorizedEventHandler) Handle(s any) (err error) {
 	event := s.(*events.UserAuthorizedEvent)
 	if event.Client == handler.clientName {
-		err = handler.repository.SaveUser(event.ClientUserId, &models.Student{
+		var hasChanges bool
+		err, hasChanges = handler.repository.SaveUser(event.ClientUserId, &models.Student{
 			Id:         uint32(event.StudentId),
 			LastName:   event.LastName,
 			FirstName:  event.FirstName,
@@ -40,6 +41,16 @@ func (handler *UserAuthorizedEventHandler) Handle(s any) (err error) {
 		if err == nil && handler.serviceContainer != nil && handler.serviceContainer.ClientController != nil {
 			go handler.callControllerAction(event)
 		}
+
+		if hasChanges {
+			if event.StudentId != 0 {
+				userCount.Inc()
+				loginCount.Inc()
+			} else {
+				logoutCount.Inc()
+				userCount.Dec()
+			}
+		}
 	}
 
 	return err
@@ -49,16 +60,11 @@ func (handler *UserAuthorizedEventHandler) callControllerAction(event *events.Us
 	var err error
 	if event.StudentId != 0 {
 		err = handler.serviceContainer.ClientController.WelcomeAuthorizedAction(event)
-		loginCount.Inc()
-		userCount.Inc()
-
 		if err != nil {
 			welcomeAuthorizedActionErrorCount.Inc()
 		}
 	} else {
 		err = handler.serviceContainer.ClientController.LogoutFinishedAction(event)
-		logoutCount.Inc()
-		userCount.Dec()
 	}
 
 	if err != nil {

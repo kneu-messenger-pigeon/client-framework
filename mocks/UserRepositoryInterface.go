@@ -86,17 +86,27 @@ func (_m *UserRepositoryInterface) GetUserCount(ctx context.Context) (uint64, er
 }
 
 // SaveUser provides a mock function with given fields: clientUserId, student
-func (_m *UserRepositoryInterface) SaveUser(clientUserId string, student *models.Student) error {
+func (_m *UserRepositoryInterface) SaveUser(clientUserId string, student *models.Student) (error, bool) {
 	ret := _m.Called(clientUserId, student)
 
 	var r0 error
+	var r1 bool
+	if rf, ok := ret.Get(0).(func(string, *models.Student) (error, bool)); ok {
+		return rf(clientUserId, student)
+	}
 	if rf, ok := ret.Get(0).(func(string, *models.Student) error); ok {
 		r0 = rf(clientUserId, student)
 	} else {
 		r0 = ret.Error(0)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(string, *models.Student) bool); ok {
+		r1 = rf(clientUserId, student)
+	} else {
+		r1 = ret.Get(1).(bool)
+	}
+
+	return r0, r1
 }
 
 type mockConstructorTestingTNewUserRepositoryInterface interface {

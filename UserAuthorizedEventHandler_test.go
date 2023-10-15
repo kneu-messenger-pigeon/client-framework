@@ -56,9 +56,10 @@ func TestUserAuthorizedEventHandler_Handle(t *testing.T) {
 			Gender:       events.Gender(expectedStudent.Gender),
 		}
 
-		userRepository.On("SaveUser", clientUserId, expectedStudent).Return(nil)
+		userRepository.On("SaveUser", clientUserId, expectedStudent).Return(nil, true)
 
-		clientController.On("WelcomeAuthorizedAction", event).Return(nil)
+		WelcomeAuthorizedActionError := errors.New("expected error")
+		clientController.On("WelcomeAuthorizedAction", event).Return(WelcomeAuthorizedActionError)
 		err := handler.Handle(event)
 
 		// wait for async coroutine call
@@ -100,7 +101,7 @@ func TestUserAuthorizedEventHandler_Handle(t *testing.T) {
 			Gender:       events.Gender(expectedStudent.Gender),
 		}
 
-		userRepository.On("SaveUser", clientUserId, expectedStudent).Return(nil)
+		userRepository.On("SaveUser", clientUserId, expectedStudent).Return(nil, true)
 
 		expectedError := errors.New("expected error")
 		clientController.On("LogoutFinishedAction", event).Return(expectedError)
@@ -145,7 +146,7 @@ func TestUserAuthorizedEventHandler_Handle(t *testing.T) {
 			Gender:       events.Gender(expectedStudent.Gender),
 		}
 
-		userRepository.On("SaveUser", clientUserId, expectedStudent).Return(expectedError)
+		userRepository.On("SaveUser", clientUserId, expectedStudent).Return(expectedError, false)
 		err := handler.Handle(event)
 
 		// wait for async coroutine call

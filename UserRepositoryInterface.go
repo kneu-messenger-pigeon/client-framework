@@ -6,7 +6,7 @@ import (
 )
 
 type UserRepositoryInterface interface {
-	SaveUser(clientUserId string, student *models.Student) error
+	SaveUser(clientUserId string, student *models.Student) (err error, hasChanges bool)
 	GetStudent(clientUserId string) *models.Student
 	GetClientUserIds(studentId uint) []string
 	Commit() error

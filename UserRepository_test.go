@@ -46,7 +46,8 @@ func TestUserRepository_SaveUser(t *testing.T) {
 
 		redisMock.ExpectTxPipelineExec()
 
-		err := userRepository.SaveUser(clientUserId, &student)
+		err, hasChanges := userRepository.SaveUser(clientUserId, &student)
+		assert.True(t, hasChanges)
 		assert.NoError(t, err)
 		assert.NoError(t, redisMock.ExpectationsWereMet())
 	})
@@ -96,7 +97,8 @@ func TestUserRepository_SaveUser(t *testing.T) {
 
 		redisMock.ExpectTxPipelineExec()
 
-		err := userRepository.SaveUser(clientUserId, &student)
+		err, hasChanges := userRepository.SaveUser(clientUserId, &student)
+		assert.True(t, hasChanges)
 		assert.NoError(t, err)
 	})
 
@@ -140,7 +142,8 @@ func TestUserRepository_SaveUser(t *testing.T) {
 
 		redisMock.ExpectTxPipelineExec()
 
-		err := userRepository.SaveUser(clientUserId, &student)
+		err, hasChanges := userRepository.SaveUser(clientUserId, &student)
+		assert.True(t, hasChanges)
 		assert.NoError(t, err)
 	})
 
@@ -178,7 +181,8 @@ func TestUserRepository_SaveUser(t *testing.T) {
 
 		redisMock.ExpectTxPipelineExec().SetErr(expectedErr)
 
-		err := userRepository.SaveUser(clientUserId, &student)
+		err, hasChanges := userRepository.SaveUser(clientUserId, &student)
+		assert.True(t, hasChanges)
 		assert.Error(t, err)
 		assert.Equal(t, expectedErr, err)
 	})
@@ -214,8 +218,12 @@ func TestUserRepository_SaveUser(t *testing.T) {
 		}
 
 		// save student for new client user
-		err := userRepository.SaveUser(expectedClientUserId, expectedStudent1)
+		err, hasChanges := userRepository.SaveUser(expectedClientUserId, expectedStudent1)
 		assert.NoError(t, err)
+		assert.True(t, hasChanges)
+
+		err, hasChanges = userRepository.SaveUser(expectedClientUserId, expectedStudent1)
+		assert.False(t, hasChanges)
 
 		actualStudent := userRepository.GetStudent(expectedClientUserId)
 		assert.Equal(t, expectedStudent1.String(), actualStudent.String())
@@ -225,7 +233,8 @@ func TestUserRepository_SaveUser(t *testing.T) {
 		assert.Equal(t, expectedClientUserId, actualClientIds[0])
 
 		// replace student
-		err = userRepository.SaveUser(expectedClientUserId, expectedStudent2)
+		err, hasChanges = userRepository.SaveUser(expectedClientUserId, expectedStudent2)
+		assert.True(t, hasChanges)
 
 		actualStudent = userRepository.GetStudent(expectedClientUserId)
 		assert.Equal(t, expectedStudent2.String(), actualStudent.String())
@@ -238,7 +247,8 @@ func TestUserRepository_SaveUser(t *testing.T) {
 		assert.Equal(t, expectedClientUserId, actualClientIds[0])
 
 		// delete student
-		err = userRepository.SaveUser(expectedClientUserId, emptyStudent)
+		err, hasChanges = userRepository.SaveUser(expectedClientUserId, emptyStudent)
+		assert.True(t, hasChanges)
 		assert.NoError(t, err)
 
 		actualStudent = userRepository.GetStudent(expectedClientUserId)
