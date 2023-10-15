@@ -12,4 +12,6 @@ var (
 
 	welcomeAuthorizedActionErrorCount = metrics.NewCounter(`error_count{type="WelcomeAuthorizedAction"}`)
 	scoreChangeActionErrorCount       = metrics.NewCounter(`error_count{type="ScoreChangeAction"}`)
+
+	scoreApiGetScoreAfterChangeErrorCount = metrics.NewCounter(`error_count{type="ScoreApiGetScoreAfterReceiveChange"}`)
 )
