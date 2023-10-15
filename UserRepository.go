@@ -19,6 +19,10 @@ const UserExpiration = time.Hour * 24 * 30 * 7 // 7 months, 210 days
 
 const RedisBackgroundSaveInProgress = "ERR Background save already in progress"
 
+const ClientUserPrefix = "cu"
+
+const UserScanBatchSize = 500
+
 func (repository *UserRepository) SaveUser(clientUserId string, student *models.Student) (err error) {
 	previousStudent := repository.GetStudent(clientUserId)
 
@@ -95,5 +99,22 @@ func (repository *UserRepository) getStudentKey(studentId uint32) string {
 }
 
 func (repository *UserRepository) getClientUserKey(clientUserId string) string {
-	return "cu" + clientUserId
+	return ClientUserPrefix + clientUserId
+}
+
+func (repository *UserRepository) GetUserCount(ctx context.Context) (redisUserCount uint64, err error) {
+	match := ClientUserPrefix + "*"
+
+	var cursor uint64
+
+	var keys []string
+	for err == nil {
+		keys, cursor, err = repository.redis.Scan(ctx, cursor, match, UserScanBatchSize).Result()
+		redisUserCount += uint64(len(keys))
+		if cursor == 0 {
+			break
+		}
+	}
+
+	return
 }

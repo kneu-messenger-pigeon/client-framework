@@ -2,6 +2,7 @@ package framework
 
 import (
 	"fmt"
+	victoriaMetricsInit "github.com/kneu-messenger-pigeon/victoria-metrics-init"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -31,6 +32,7 @@ var expectedBaseConfig = BaseConfig{
 
 func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 	t.Run("FromEnvVars", func(t *testing.T) {
+		victoriaMetricsInit.LastInstance = ""
 		_ = os.Unsetenv("KAFKA_TIMEOUT")
 		_ = os.Unsetenv("KAFKA_ATTEMPTS")
 		_ = os.Setenv("APP_SECRET", expectedBaseConfig.appSecret)
@@ -48,6 +50,8 @@ func TestLoadBaseConfigFromEnvVars(t *testing.T) {
 		assert.NoErrorf(t, err, "got unexpected error %s", err)
 		assertBaseConfig(t, expectedBaseConfig, baseConfig)
 		assert.Equalf(t, expectedBaseConfig, baseConfig, "Expected for %v, actual: %v", expectedBaseConfig, baseConfig)
+
+		assert.Equal(t, victoriaMetricsInit.LastInstance, testClientName)
 	})
 
 	t.Run("FromFile", func(t *testing.T) {

@@ -2,6 +2,7 @@ package framework
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/go-redis/redismock/v9"
@@ -409,5 +410,47 @@ func TestUserRepository_GetClientUserIds(t *testing.T) {
 
 		actualIds := userRepository.GetClientUserIds(studentId)
 		assert.Equal(t, []string{}, actualIds)
+	})
+}
+
+func TestUserRepository_GetUserCount(t *testing.T) {
+	t.Run("succes", func(t *testing.T) {
+		redisClient, redisMock := redismock.NewClientMock()
+		redisMock.MatchExpectationsInOrder(true)
+
+		match := ClientUserPrefix + "*"
+
+		returnKeysBatch1 := []string{
+			"cu1",
+			"cu2",
+			"cu3",
+			"cu4",
+		}
+
+		returnKeysBatch2 := []string{
+			"cu9",
+			"cu10",
+			"cu11",
+			"cu12",
+			"cu14",
+			"cu16",
+		}
+
+		nextCursor := uint64(110)
+
+		redisMock.ExpectScan(0, match, UserScanBatchSize).SetVal(returnKeysBatch1, nextCursor)
+		redisMock.ExpectScan(nextCursor, match, UserScanBatchSize).SetVal(returnKeysBatch2, 0)
+
+		userRepository := UserRepository{
+			out:   &bytes.Buffer{},
+			redis: redisClient,
+		}
+
+		count, err := userRepository.GetUserCount(context.Background())
+
+		expectCount := uint64(len(returnKeysBatch1) + len(returnKeysBatch2))
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectCount, count)
 	})
 }

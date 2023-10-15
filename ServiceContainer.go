@@ -22,6 +22,7 @@ type ServiceContainer struct {
 	ScoreChangedEventProcessorPool [ScoreChangedEventProcessorCount]KafkaConsumerProcessorInterface
 	Executor                       *Executor
 	ClientController               ClientControllerInterface
+	UserCountMetricsSyncer         UserCountMetricsSyncerInterface
 }
 
 func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
@@ -42,6 +43,11 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 	container.UserRepository = &UserRepository{
 		out:   out,
 		redis: redisClient,
+	}
+
+	container.UserCountMetricsSyncer = &UserCountMetricsSyncer{
+		out:            out,
+		userRepository: container.UserRepository,
 	}
 
 	container.UserLogoutHandler = &UserLogoutHandler{

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/joho/godotenv"
+	victoriaMetricsInit "github.com/kneu-messenger-pigeon/victoria-metrics-init"
 	"github.com/redis/go-redis/v9"
 	"os"
 	"strconv"
@@ -32,6 +33,8 @@ func LoadBaseConfig(envFilename string, clientName string) (BaseConfig, error) {
 			return BaseConfig{}, errors.New(fmt.Sprintf("Error loading %s file: %s", envFilename, err))
 		}
 	}
+
+	victoriaMetricsInit.InitMetrics(clientName)
 
 	kafkaTimeout, err := strconv.Atoi(os.Getenv("KAFKA_TIMEOUT"))
 	if kafkaTimeout == 0 || err != nil {

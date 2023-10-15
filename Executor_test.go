@@ -28,6 +28,9 @@ func TestEventLoopExecute(t *testing.T) {
 		clientController := mocks.NewClientControllerInterface(t)
 		clientController.On("Execute", matchContext, matchWaitGroup).Return().Times(1)
 
+		userCountMetricsSyncer := mocks.NewUserCountMetricsSyncerInterface(t)
+		userCountMetricsSyncer.On("Execute", matchContext, matchWaitGroup).Return().Times(1)
+
 		redisClient, redisMock := redismock.NewClientMock()
 		redisMock.MatchExpectationsInOrder(true)
 
@@ -45,6 +48,7 @@ func TestEventLoopExecute(t *testing.T) {
 				UserAuthorizedEventProcessor:   processor,
 				ScoreChangedEventProcessorPool: processorPool,
 				ClientController:               clientController,
+				UserCountMetricsSyncer:         userCountMetricsSyncer,
 			},
 		}
 

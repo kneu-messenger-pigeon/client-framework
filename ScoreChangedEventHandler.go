@@ -103,6 +103,7 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 
 	previousMessageIds := handler.scoreChangedMessageIdStorage.GetAll(event.StudentId, event.LessonId)
 	for _, chatId := range *chatIds {
+		scoreChangesSendCount.Inc()
 		err, newMessageId := handler.serviceContainer.ClientController.ScoreChangedAction(
 			chatId, previousMessageIds[chatId], &disciplineScore, previousScore,
 		)
@@ -113,6 +114,7 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 		)
 
 		if err != nil {
+			welcomeAuthorizedActionErrorCount.Inc()
 			_, _ = fmt.Fprintf(handler.out, "ScoreChangedAction return error: %v\n", err)
 		}
 

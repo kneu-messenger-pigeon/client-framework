@@ -41,6 +41,13 @@ func TestNewServiceContainer(t *testing.T) {
 		assert.NotEmpty(t, serviceContainer.UserRepository.redis)
 		assert.Equal(t, out, serviceContainer.UserRepository.out)
 
+		assert.NotEmpty(t, serviceContainer.UserCountMetricsSyncer)
+		assert.IsType(t, &UserCountMetricsSyncer{}, serviceContainer.UserCountMetricsSyncer)
+
+		userCountMetricsSyncer := serviceContainer.UserCountMetricsSyncer.(*UserCountMetricsSyncer)
+		assert.Equal(t, serviceContainer.UserRepository, userCountMetricsSyncer.userRepository)
+		assert.Equal(t, out, userCountMetricsSyncer.out)
+
 		assert.NotEmpty(t, serviceContainer.UserLogoutHandler)
 		assert.NotEmpty(t, serviceContainer.UserLogoutHandler.writer)
 		assert.Equal(t, config.clientName, serviceContainer.UserLogoutHandler.Client)

@@ -49,8 +49,16 @@ func (handler *UserAuthorizedEventHandler) callControllerAction(event *events.Us
 	var err error
 	if event.StudentId != 0 {
 		err = handler.serviceContainer.ClientController.WelcomeAuthorizedAction(event)
+		loginCount.Inc()
+		userCount.Inc()
+
+		if err != nil {
+			welcomeAuthorizedActionErrorCount.Inc()
+		}
 	} else {
 		err = handler.serviceContainer.ClientController.LogoutFinishedAction(event)
+		logoutCount.Inc()
+		userCount.Dec()
 	}
 
 	if err != nil {
