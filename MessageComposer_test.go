@@ -22,10 +22,16 @@ func TestMessageComposer_ComposeWelcomeAnonymousMessage(t *testing.T) {
 
 		authUrl := "https://example.com/auth"
 
-		err, message := composer.ComposeWelcomeAnonymousMessage(authUrl)
+		messageData := models.WelcomeAnonymousMessageData{
+			AuthUrl:  authUrl,
+			ExpireAt: time.Date(2024, 5, 15, 16, 25, 0, 0, time.Local),
+		}
+
+		err, message := composer.ComposeWelcomeAnonymousMessage(messageData)
 
 		assert.NoError(t, err)
 		assert.Contains(t, message, authUrl)
+		assert.Contains(t, message, "до 16:25")
 	})
 }
 

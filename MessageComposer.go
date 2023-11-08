@@ -52,8 +52,8 @@ func (composer *MessageComposer) SetPostFilter(filter func(string) string) {
 	composer.postFilter = filter
 }
 
-func (composer *MessageComposer) ComposeWelcomeAnonymousMessage(authUrl string) (error, string) {
-	return composer.compose("WelcomeAnonymous.md", authUrl)
+func (composer *MessageComposer) ComposeWelcomeAnonymousMessage(messageData models.WelcomeAnonymousMessageData) (error, string) {
+	return composer.compose("WelcomeAnonymous.md", messageData)
 }
 
 func (composer *MessageComposer) ComposeWelcomeAuthorizedMessage(messageData models.UserAuthorizedMessageData) (error, string) {

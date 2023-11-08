@@ -2,7 +2,13 @@ package models
 
 import (
 	scoreApi "github.com/kneu-messenger-pigeon/score-api"
+	"time"
 )
+
+type WelcomeAnonymousMessageData struct {
+	AuthUrl  string
+	ExpireAt time.Time
+}
 
 type StudentMessageData struct {
 	NamePrefix string

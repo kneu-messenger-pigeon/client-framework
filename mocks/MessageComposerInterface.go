@@ -108,23 +108,23 @@ func (_m *MessageComposerInterface) ComposeScoreChanged(messageData models.Score
 	return r0, r1
 }
 
-// ComposeWelcomeAnonymousMessage provides a mock function with given fields: authUrl
-func (_m *MessageComposerInterface) ComposeWelcomeAnonymousMessage(authUrl string) (error, string) {
-	ret := _m.Called(authUrl)
+// ComposeWelcomeAnonymousMessage provides a mock function with given fields: messageData
+func (_m *MessageComposerInterface) ComposeWelcomeAnonymousMessage(messageData models.WelcomeAnonymousMessageData) (error, string) {
+	ret := _m.Called(messageData)
 
 	var r0 error
 	var r1 string
-	if rf, ok := ret.Get(0).(func(string) (error, string)); ok {
-		return rf(authUrl)
+	if rf, ok := ret.Get(0).(func(models.WelcomeAnonymousMessageData) (error, string)); ok {
+		return rf(messageData)
 	}
-	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(authUrl)
+	if rf, ok := ret.Get(0).(func(models.WelcomeAnonymousMessageData) error); ok {
+		r0 = rf(messageData)
 	} else {
 		r0 = ret.Error(0)
 	}
 
-	if rf, ok := ret.Get(1).(func(string) string); ok {
-		r1 = rf(authUrl)
+	if rf, ok := ret.Get(1).(func(models.WelcomeAnonymousMessageData) string); ok {
+		r1 = rf(messageData)
 	} else {
 		r1 = ret.Get(1).(string)
 	}
