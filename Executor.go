@@ -25,10 +25,11 @@ func (executor *Executor) Execute() {
 
 	wg := &sync.WaitGroup{}
 
-	wg.Add(3)
+	wg.Add(4)
 	go executor.serviceContainer.ClientController.Execute(ctx, wg)
 	go executor.serviceContainer.UserAuthorizedEventProcessor.Execute(ctx, wg)
 	go executor.serviceContainer.UserCountMetricsSyncer.Execute(ctx, wg)
+	go executor.serviceContainer.WelcomeAnonymousDelayedDeleter.Execute(ctx, wg)
 
 	wg.Add(len(executor.serviceContainer.ScoreChangedEventProcessorPool))
 	for _, scoreChangedEventProcessor := range executor.serviceContainer.ScoreChangedEventProcessorPool {

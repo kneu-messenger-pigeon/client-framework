@@ -5,6 +5,7 @@ package mocks
 import (
 	context "context"
 
+	contracts "github.com/kneu-messenger-pigeon/client-framework/delayedDeleter/contracts"
 	events "github.com/kneu-messenger-pigeon/events"
 
 	mock "github.com/stretchr/testify/mock"
@@ -22,6 +23,20 @@ type ClientControllerInterface struct {
 // Execute provides a mock function with given fields: ctx, wg
 func (_m *ClientControllerInterface) Execute(ctx context.Context, wg *sync.WaitGroup) {
 	_m.Called(ctx, wg)
+}
+
+// HandleDeleteTask provides a mock function with given fields: task
+func (_m *ClientControllerInterface) HandleDeleteTask(task *contracts.DeleteTask) error {
+	ret := _m.Called(task)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*contracts.DeleteTask) error); ok {
+		r0 = rf(task)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // LogoutFinishedAction provides a mock function with given fields: event

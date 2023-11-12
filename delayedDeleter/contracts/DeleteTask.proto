@@ -1,0 +1,12 @@
+// protoc --go_out=delayedDeleter delayedDeleter/DeleteTask.proto
+syntax="proto3";
+
+package framework;
+
+option go_package="./;delayedDeleter";
+
+message DeleteTask {
+  int64 scheduledAt = 1;
+  int32 MessageId = 2;
+  int64 ChatId = 3;
+}

@@ -616,6 +616,8 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		stateStorage := mocks.NewScoreChangedStateStorageInterface(t)
 		stateStorage.On("Get", event.StudentId, event.LessonId).Once().Return(previousState)
 
+		clientController := mocks.NewClientControllerInterface(t)
+
 		handler := ScoreChangedEventHandler{
 			out:                          &bytes.Buffer{},
 			debugLogger:                  &DebugLogger{},
@@ -624,15 +626,12 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			scoreChangedEventComposer:    scoreChangeEventComposer,
 			scoreChangedStateStorage:     stateStorage,
 			scoreChangedMessageIdStorage: mocks.NewScoreChangedMessageIdStorageInterface(t),
-			serviceContainer:             &ServiceContainer{},
+			serviceContainer: &ServiceContainer{
+				ClientController: clientController,
+			},
 		}
 
-		clientController := mocks.NewClientControllerInterface(t)
-		var err error
-
-		handler.serviceContainer.SetController(clientController)
-
-		err = handler.Handle(&event)
+		err := handler.Handle(&event)
 		assert.NoError(t, err)
 		runtime.Gosched()
 		time.Sleep(time.Millisecond * 40)
@@ -754,6 +753,17 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 			Addr:    miniredis.RunT(t).Addr(),
 		})
 
+		firstMessageSendingWait := make(chan time.Time)
+
+		clientController := mocks.NewClientControllerInterface(t)
+		clientController.On("ScoreChangedAction", chatIds[0], "", &disciplineScore1, &previousScore).
+			Once().WaitUntil(firstMessageSendingWait).
+			Return(nil, createdMessageIds[0])
+
+		clientController.On("ScoreChangedAction", chatIds[1], "", &disciplineScore1, &previousScore).
+			Once().WaitUntil(firstMessageSendingWait).
+			Return(nil, createdMessageIds[1])
+
 		handler := ScoreChangedEventHandler{
 			out:         &bytes.Buffer{},
 			debugLogger: &DebugLogger{},
@@ -773,25 +783,12 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 				redis:         redisClient,
 				storageExpire: time.Minute,
 			},
-			serviceContainer: &ServiceContainer{},
+			serviceContainer: &ServiceContainer{
+				ClientController: clientController,
+			},
 		}
 
-		firstMessageSendingWait := make(chan time.Time)
-
-		clientController := mocks.NewClientControllerInterface(t)
-		clientController.On("ScoreChangedAction", chatIds[0], "", &disciplineScore1, &previousScore).
-			Once().WaitUntil(firstMessageSendingWait).
-			Return(nil, createdMessageIds[0])
-
-		clientController.On("ScoreChangedAction", chatIds[1], "", &disciplineScore1, &previousScore).
-			Once().WaitUntil(firstMessageSendingWait).
-			Return(nil, createdMessageIds[1])
-
-		var err error
-
-		handler.serviceContainer.SetController(clientController)
-
-		err = handler.Handle(&event1)
+		err := handler.Handle(&event1)
 		assert.NoError(t, err)
 		runtime.Gosched()
 		time.Sleep(time.Millisecond * 40)

@@ -31,6 +31,9 @@ func TestEventLoopExecute(t *testing.T) {
 		userCountMetricsSyncer := mocks.NewUserCountMetricsSyncerInterface(t)
 		userCountMetricsSyncer.On("Execute", matchContext, matchWaitGroup).Return().Times(1)
 
+		deleter := mocks.NewDeleterInterface(t)
+		deleter.On("Execute", matchContext, matchWaitGroup).Return().Times(1)
+
 		redisClient, redisMock := redismock.NewClientMock()
 		redisMock.MatchExpectationsInOrder(true)
 
@@ -49,6 +52,7 @@ func TestEventLoopExecute(t *testing.T) {
 				ScoreChangedEventProcessorPool: processorPool,
 				ClientController:               clientController,
 				UserCountMetricsSyncer:         userCountMetricsSyncer,
+				WelcomeAnonymousDelayedDeleter: deleter,
 			},
 		}
 

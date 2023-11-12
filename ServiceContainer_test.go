@@ -2,6 +2,7 @@ package framework
 
 import (
 	"bytes"
+	"github.com/kneu-messenger-pigeon/client-framework/delayedDeleter"
 	"github.com/kneu-messenger-pigeon/client-framework/mocks"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
@@ -10,7 +11,7 @@ import (
 )
 
 func TestNewServiceContainer(t *testing.T) {
-	t.Run("succeess", func(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
 		out := &bytes.Buffer{}
 		config := BaseConfig{
 			clientName:                  "test-client",
@@ -113,6 +114,9 @@ func TestNewServiceContainer(t *testing.T) {
 			assert.Equal(t, out, scoreChangedMessageIdStorage.out)
 		}
 
+		assert.NotNil(t, serviceContainer.WelcomeAnonymousDelayedDeleter)
+		assert.IsType(t, &delayedDeleter.Deleter{}, serviceContainer.WelcomeAnonymousDelayedDeleter)
+
 		assert.NotNil(t, serviceContainer.Executor)
 		assert.IsType(t, &Executor{}, serviceContainer.Executor)
 		assert.Equal(t, serviceContainer, serviceContainer.Executor.serviceContainer)
@@ -123,8 +127,15 @@ func TestNewServiceContainer(t *testing.T) {
 }
 
 func TestServiceContainer_SetController(t *testing.T) {
-	serviceContainer := &ServiceContainer{}
 	controller := mocks.NewClientControllerInterface(t)
+
+	deleter := mocks.NewDeleterInterface(t)
+	deleter.On("SetHandler", controller).Return()
+
+	serviceContainer := &ServiceContainer{
+		WelcomeAnonymousDelayedDeleter: deleter,
+	}
+
 	serviceContainer.SetController(controller)
 	assert.Equal(t, controller, serviceContainer.ClientController)
 }

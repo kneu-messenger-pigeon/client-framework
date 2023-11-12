@@ -2,6 +2,8 @@ package framework
 
 import (
 	"github.com/kneu-messenger-pigeon/authorizer-client"
+	"github.com/kneu-messenger-pigeon/client-framework/delayedDeleter"
+	"github.com/kneu-messenger-pigeon/client-framework/delayedDeleter/contracts"
 	"github.com/kneu-messenger-pigeon/events"
 	"github.com/kneu-messenger-pigeon/score-client"
 	"github.com/redis/go-redis/v9"
@@ -20,6 +22,7 @@ type ServiceContainer struct {
 	ScoreClient                    *score.Client
 	UserAuthorizedEventProcessor   KafkaConsumerProcessorInterface
 	ScoreChangedEventProcessorPool [ScoreChangedEventProcessorCount]KafkaConsumerProcessorInterface
+	WelcomeAnonymousDelayedDeleter contracts.DeleterInterface
 	Executor                       *Executor
 	ClientController               ClientControllerInterface
 	UserCountMetricsSyncer         UserCountMetricsSyncerInterface
@@ -134,6 +137,10 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 		}
 	}
 
+	container.WelcomeAnonymousDelayedDeleter = delayedDeleter.NewWelcomeAnonymousMessageDelayedDeleter(
+		redisClient, out, "welcome_anonymous_message",
+	)
+
 	container.Executor = &Executor{
 		out:              out,
 		serviceContainer: container,
@@ -144,4 +151,5 @@ func NewServiceContainer(config BaseConfig, out io.Writer) *ServiceContainer {
 
 func (container *ServiceContainer) SetController(controller ClientControllerInterface) {
 	container.ClientController = controller
+	container.WelcomeAnonymousDelayedDeleter.SetHandler(controller)
 }
