@@ -252,7 +252,7 @@ func TestUserRepository_SaveUser(t *testing.T) {
 		assert.NoError(t, err)
 
 		actualStudent = userRepository.GetStudent(expectedClientUserId)
-		assert.Nil(t, actualStudent)
+		assert.Equal(t, emptyStudent.String(), actualStudent.String())
 
 		actualClientIds = userRepository.GetClientUserIds(uint(expectedStudent1.Id))
 		assert.Len(t, actualClientIds, 0)
@@ -311,7 +311,7 @@ func TestUserRepository_GetStudent(t *testing.T) {
 		redisMock.ExpectGetEx(clientUserId, UserExpiration).RedisNil()
 
 		actualStudent := userRepository.GetStudent(clientUserId)
-		assert.Nil(t, actualStudent)
+		assertStudent(t, &models.Student{}, actualStudent)
 	})
 }
 

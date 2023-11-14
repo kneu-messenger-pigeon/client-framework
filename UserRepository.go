@@ -23,26 +23,21 @@ const ClientUserPrefix = "cu"
 
 const UserScanBatchSize = 500
 
-func (repository *UserRepository) SaveUser(clientUserId string, student *models.Student) (error, bool) {
+func (repository *UserRepository) SaveUser(clientUserId string, student *models.Student) (err error, hasChanges bool) {
 	previousStudent := repository.GetStudent(clientUserId)
 
 	studentSerialized, err := proto.Marshal(student)
 	ctx := context.Background()
 
-	hasChanges := previousStudent != student
-	if previousStudent != nil && student != nil {
-		hasChanges = previousStudent.Id != student.Id
-	}
-
 	if err == nil {
 		clientUserKey := repository.getClientUserKey(clientUserId)
 		pipe := repository.redis.TxPipeline()
 
-		if hasChanges && previousStudent != nil {
+		if previousStudent.Id != student.Id && previousStudent.Id != 0 {
 			pipe.SRem(ctx, repository.getStudentKey(previousStudent.Id), clientUserId)
 		}
 
-		if student == nil || student.Id == 0 {
+		if student.Id == 0 {
 			pipe.Del(ctx, clientUserKey)
 		} else {
 			pipe.Set(ctx, clientUserKey, studentSerialized, UserExpiration)
@@ -54,7 +49,7 @@ func (repository *UserRepository) SaveUser(clientUserId string, student *models.
 		_, err = pipe.Exec(ctx)
 	}
 
-	return err, hasChanges
+	return err, previousStudent.Id != student.Id
 }
 
 func (repository *UserRepository) Commit() error {
@@ -73,16 +68,16 @@ func (repository *UserRepository) GetStudent(clientUserId string) *models.Studen
 		UserExpiration,
 	).Bytes()
 
+	student := &models.Student{}
 	if studentSerialized != nil && len(studentSerialized) > 0 {
-		student := models.Student{}
-		_ = proto.Unmarshal(studentSerialized, &student)
-		if student.Id != 0 {
-			repository.redis.Expire(ctx, repository.getStudentKey(student.Id), UserExpiration)
-			return &student
-		}
+		_ = proto.Unmarshal(studentSerialized, student)
 	}
 
-	return nil
+	if student.Id != 0 {
+		repository.redis.Expire(ctx, repository.getStudentKey(student.Id), UserExpiration)
+	}
+
+	return student
 }
 
 func (repository *UserRepository) GetClientUserIds(studentId uint) []string {
