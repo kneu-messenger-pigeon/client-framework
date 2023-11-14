@@ -73,7 +73,7 @@ func (handler *ScoreChangedEventHandler) callControllerAction(
 	mutex := handler.multiMutex.Get((event.LessonId & event.StudentId) * (event.LessonId | event.StudentId))
 	mutex.Lock()
 	defer mutex.Unlock()
-	handler.debugLogger.Log("Get lock to process event: %v", event)
+	handler.debugLogger.Log("Get lock to process event: %#v", event)
 
 	disciplineScore, err := handler.scoreClient.GetStudentScore(
 		uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId),
