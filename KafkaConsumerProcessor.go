@@ -3,6 +3,7 @@ package framework
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/kneu-messenger-pigeon/events"
 	"github.com/segmentio/kafka-go"
@@ -71,7 +72,7 @@ func (processor *KafkaConsumerProcessor) Execute(ctx context.Context, wg *sync.W
 			}
 		}
 
-		if err != nil && err != context.Canceled {
+		if err != nil && !errors.Is(err, context.Canceled) {
 			_, _ = fmt.Fprintf(processor.out, "%T error: %v \n", processor.handler, err)
 		}
 	}
