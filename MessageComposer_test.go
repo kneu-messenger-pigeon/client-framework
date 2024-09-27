@@ -86,6 +86,7 @@ func TestMessageComposer_ComposeDisciplinesListMessage(t *testing.T) {
 		messageData := models.DisciplinesListMessageData{
 			StudentMessageData: composeTestStudentData,
 			Disciplines:        disciplines,
+			SupportInfo:        "Some support info",
 		}
 
 		composer := NewMessageComposer(MessageComposerConfig{})
@@ -103,6 +104,7 @@ func TestMessageComposer_ComposeDisciplinesListMessage(t *testing.T) {
 
 		assert.Contains(t, message, "офіційному журналі успішності КНЕУ")
 		assert.Contains(t, message, "https://cutt.ly/Dekanat")
+		assert.Contains(t, message, "Some support info")
 	})
 }
 

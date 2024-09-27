@@ -22,6 +22,7 @@ type UserAuthorizedMessageData struct {
 type DisciplinesListMessageData struct {
 	StudentMessageData
 	Disciplines scoreApi.DisciplineScoreResults
+	SupportInfo string
 }
 
 type DisciplinesScoresMessageData struct {
