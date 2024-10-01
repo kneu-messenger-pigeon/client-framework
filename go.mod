@@ -8,8 +8,8 @@ require (
 	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kneu-messenger-pigeon/authorizer-client v0.1.7
-	github.com/kneu-messenger-pigeon/events v0.1.41
-	github.com/kneu-messenger-pigeon/score-api v0.1.11
+	github.com/kneu-messenger-pigeon/events v0.1.42
+	github.com/kneu-messenger-pigeon/score-api v0.1.12
 	github.com/kneu-messenger-pigeon/score-client v0.1.13
 	github.com/kneu-messenger-pigeon/victoria-metrics-init v0.1.3
 	github.com/redis/go-redis/v9 v9.6.1
