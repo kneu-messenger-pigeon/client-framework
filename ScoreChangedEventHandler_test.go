@@ -8,7 +8,7 @@ import (
 	"github.com/kneu-messenger-pigeon/client-framework/models"
 	"github.com/kneu-messenger-pigeon/events"
 	scoreApi "github.com/kneu-messenger-pigeon/score-api"
-	"github.com/kneu-messenger-pigeon/score-client"
+	scoreMocks "github.com/kneu-messenger-pigeon/score-client/mocks"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -89,7 +89,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		userRepository := mocks.NewUserRepositoryInterface(t)
 		userRepository.On("GetClientUserIds", event.StudentId).Return(chatIds)
 
-		scoreClient := score.NewMockClientInterface(t)
+		scoreClient := scoreMocks.NewClientInterface(t)
 		scoreClient.On("GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId)).
 			Return(disciplineScore, nil)
 
@@ -195,7 +195,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		userRepository := mocks.NewUserRepositoryInterface(t)
 		userRepository.On("GetClientUserIds", event.StudentId).Return(chatIds)
 
-		scoreClient := score.NewMockClientInterface(t)
+		scoreClient := scoreMocks.NewClientInterface(t)
 		scoreClient.On("GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId)).Return(disciplineScore, nil)
 
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
@@ -301,7 +301,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		userRepository := mocks.NewUserRepositoryInterface(t)
 		userRepository.On("GetClientUserIds", event.StudentId).Return(chatIds)
 
-		scoreClient := score.NewMockClientInterface(t)
+		scoreClient := scoreMocks.NewClientInterface(t)
 		scoreClient.On("GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId)).Return(disciplineScore, nil)
 
 		scoreChangeEventComposer := mocks.NewScoreChangeEventComposerInterface(t)
@@ -413,7 +413,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		userRepository := mocks.NewUserRepositoryInterface(t)
 		userRepository.On("GetClientUserIds", event.StudentId).Return(chatIds)
 
-		scoreClient := score.NewMockClientInterface(t)
+		scoreClient := scoreMocks.NewClientInterface(t)
 		scoreClient.On(
 			"GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId),
 		).Return(disciplineScore, nil)
@@ -487,7 +487,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		userRepository := mocks.NewUserRepositoryInterface(t)
 		userRepository.On("GetClientUserIds", event.StudentId).Return([]string{"test-chat-id-1"})
 
-		scoreClient := score.NewMockClientInterface(t)
+		scoreClient := scoreMocks.NewClientInterface(t)
 		scoreClient.On(
 			"GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId),
 		).Return(scoreApi.DisciplineScore{}, expectedError)
@@ -600,7 +600,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		userRepository := mocks.NewUserRepositoryInterface(t)
 		userRepository.On("GetClientUserIds", event.StudentId).Return([]string{"test-chat-id-1"})
 
-		scoreClient := score.NewMockClientInterface(t)
+		scoreClient := scoreMocks.NewClientInterface(t)
 		scoreClient.
 			On("GetStudentScore", uint32(event.StudentId), int(event.DisciplineId), int(event.LessonId)).
 			Once().
@@ -742,7 +742,7 @@ func TestScoreChangedEventHandler_Handle(t *testing.T) {
 		userRepository := mocks.NewUserRepositoryInterface(t)
 		userRepository.On("GetClientUserIds", event1.StudentId).Return(chatIds)
 
-		scoreClient := score.NewMockClientInterface(t)
+		scoreClient := scoreMocks.NewClientInterface(t)
 		scoreClient.
 			On("GetStudentScore", uint32(event1.StudentId), int(event1.DisciplineId), int(event1.LessonId)).
 			Once().

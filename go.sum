@@ -43,6 +43,8 @@ github.com/kneu-messenger-pigeon/score-api v0.1.11 h1:YZ3fKhJqHVCPXoqAT7BuWpxCve
 github.com/kneu-messenger-pigeon/score-api v0.1.11/go.mod h1:xP8MpI8JaEeR7GUEWnq3p0meJ41Tz5+N+aRKNC4nRbM=
 github.com/kneu-messenger-pigeon/score-client v0.1.12 h1:1IPxFOxJxd9Mr7dMvHS+wFIFY6UE0liHB3N6crjQUlM=
 github.com/kneu-messenger-pigeon/score-client v0.1.12/go.mod h1:E8rYhhJQjRdiaKX2xNlRKwyETUHlGHz8DbjdVa+XyWs=
+github.com/kneu-messenger-pigeon/score-client v0.1.13 h1:oaVZdp0raqXw1/GYJPdI7fivYNvZXbZGILZGolIex4w=
+github.com/kneu-messenger-pigeon/score-client v0.1.13/go.mod h1:E8rYhhJQjRdiaKX2xNlRKwyETUHlGHz8DbjdVa+XyWs=
 github.com/kneu-messenger-pigeon/victoria-metrics-init v0.1.3 h1:uqqgx7rA1WsHb0q9CZxI/hgop6VnXy1+KIz+sBqDRHs=
 github.com/kneu-messenger-pigeon/victoria-metrics-init v0.1.3/go.mod h1:CpgTvzhSjL3E2ZkcI8sp+5Vp+kIsus/o1jC+EpoHeSc=
 github.com/kr/pretty v0.3.0 h1:WgNl7dwNpEZ6jJ9k1snq4pZsg7DOEN8hP9Xw0Tsjwk0=
